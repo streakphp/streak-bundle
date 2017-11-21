@@ -1,0 +1,33 @@
+{
+  "name": "streak/streak-bundle",
+  "type": "symfony-bundle",
+  "description": "",
+  "keywords": ["es","cqrs","event sourcing", "command query responsibility segregation", "command", "command bus", "event", "symfony", "bundle", "symfony bundle"],
+  "homepage": "https://streakphp.com",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Alan Gabriel Bem",
+      "email": "alan.bem@gmail.com",
+      "homepage": "https://github.com/alanbem"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Streak\\StreakBundle\\": "src"
+    }
+  },
+  "require": {
+    "php": ">=7.1",
+    "symfony/http-kernel": "^4.0",
+    "symfony/form": "^4.0",
+    "streak/streak": "^1.0"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0.x-dev"
+    }
+  }
+}
