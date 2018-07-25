@@ -1,0 +1,114 @@
+services:
+
+  streak.postgres.pdo:
+    class: \Doctrine\DBAL\Driver\PDOConnection
+    arguments:
+      - '%env(POSTGRES_PDO_DSN)%'
+
+  streak.flat.event.converter:
+    class: Streak\Infrastructure\Event\Converter\FlatObjectConverter
+
+  streak.event.converter.composite:
+    class: Streak\Infrastructure\Event\Converter\CompositeConverter
+    arguments:
+      - '@streak.flat.event.converter'
+
+  streak.event.converter: '@streak.event.converter.composite'
+
+  streak.unit_of_work:
+    class: Streak\Infrastructure\UnitOfWork
+    arguments:
+      - '@streak.event_store'
+
+  streak.event_sourced.subscription.factory:
+    class: Streak\Domain\Event\Sourced\Subscription\Factory
+
+  streak.subscription.factory: '@streak.event_sourced.subscription.factory'
+
+  streak.listener.factory.composite:
+    class: Streak\Infrastructure\Event\Listener\CompositeFactory
+#    calls:
+#      - ['add', ['@impl.listener.factory']]
+
+  streak.listener.factory: '@streak.listener.factory.composite'
+
+  streak.event_sourced.subscription.repository:
+    class: Streak\Infrastructure\Event\Subscription\EventSourcedRepository
+    arguments:
+      - '@streak.subscription.factory'
+      - '@streak.listener.factory'
+      - '@streak.event_store'
+      - '@streak.unit_of_work'
+
+  streak.subscription.repository: '@streak.event_sourced.subscription.repository'
+
+  streak.event_bus.in_memory:
+    class: Streak\Infrastructure\EventBus\InMemoryEventBus
+#    calls:
+#      - [ add, [ '@impl.listener.subscriber' ]]
+
+  streak.event_bus: '@streak.event_bus.in_memory'
+
+  streak.command_handler.composite:
+    class: Streak\Infrastructure\CommandHandler\CompositeCommandHandler
+#    calls:
+#      - [ registerHandler, [ '@impl.command_handler' ]]
+
+  streak.command_handler: '@streak.command_handler.composite'
+
+  streak.transactional_persistence.command_handler:
+    class: Streak\Infrastructure\CommandHandler\TransactionalPersistenceCommandHandler
+    decorates: streak.command_handler
+    arguments:
+      - '@streak.transactional_persistence.command_handler.inner'
+      - '@streak.unit_of_work'
+
+  streak.command_bus.synchronous:
+    class: Streak\Infrastructure\CommandBus\SynchronousCommandBus
+    calls:
+      - [ register, [ '@streak.command_handler' ] ]
+
+  streak.command_bus: '@streak.command_bus.synchronous'
+
+  streak.event_store.postgres.pdo:
+    class: Streak\Infrastructure\EventStore\PDOPostgresEventStore
+    arguments:
+      - '@streak.postgres.pdo'
+      - '@streak.event.converter'
+
+  streak.event_store: '@streak.event_store.postgres.pdo'
+
+  streak.publishing.event_store:
+    class: Streak\Infrastructure\EventStore\PublishingEventStore
+    decorates: streak.event_store
+    arguments:
+      - '@streak.publishing.event_store.inner'
+      - '@streak.event_bus'
+
+  streak.aggregate.factory.composite:
+    class: Streak\Infrastructure\AggregateRoot\Factory\CompositeFactory
+#    calls:
+#      - [ add, [ '@impl.aggregate.factory' ]]
+
+  streak.aggregate.factory: '@streak.aggregate.factory.composite'
+
+  streak.event_sourced.aggregate.repository:
+    class: Streak\Infrastructure\AggregateRoot\Repository\EventSourcedRepository
+    arguments:
+      - '@streak.aggregate.factory'
+      - '@streak.event_store'
+      - '@streak.unit_of_work'
+
+  streak.aggregate.repository: '@streak.event_sourced.aggregate.repository'
+
+  Streak\Domain\Event\Converter: '@streak.event.converter'
+  Streak\Infrastructure\UnitOfWork: '@streak.unit_of_work'
+  Streak\Domain\Event\Subscription\Factory: '@streak.event_sourced.subscription.factory'
+  Streak\Domain\Event\Listener\Factory: '@streak.listener.factory'
+  Streak\Domain\Event\Subscription\Repository: '@streak.subscription.repository'
+  Streak\Domain\EventBus: '@streak.event_bus'
+  Streak\Application\CommandHandler: '@streak.command_handler'
+  Streak\Application\CommandBus: '@streak.command_bus'
+  Streak\Domain\EventStore: '@streak.event_store'
+  Streak\Domain\AggregateRoot\Factory: '@streak.aggregate.factory'
+  Streak\Domain\AggregateRoot\Repository: '@streak.aggregate.repository'
