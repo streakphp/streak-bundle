@@ -101,6 +101,15 @@ services:
 
   streak.aggregate.repository: '@streak.event_sourced.aggregate.repository'
 
+  streak.subscriptions.run.command:
+    class: Streak\StreakBundle\Command\RunSubscriptionsCommand
+    arguments:
+      - '@streak.subscription.repository'
+      - '@streak.event_store'
+      - '@streak.unit_of_work'
+    tags:
+      - { name: 'console.command' }
+
   Streak\Domain\Event\Converter: '@streak.event.converter'
   Streak\Infrastructure\UnitOfWork: '@streak.unit_of_work'
   Streak\Domain\Event\Subscription\Factory: '@streak.event_sourced.subscription.factory'
