@@ -1,3 +1,6 @@
+parameters:
+  streak.command_retry_max_attempts: 0
+
 services:
 
   streak.postgres.pdo:
@@ -69,6 +72,13 @@ services:
       - [ register, [ '@streak.command_handler' ] ]
 
   streak.command_bus: '@streak.command_bus.synchronous'
+
+  streak.command_bus.retrying:
+    class: Streak\Infrastructure\CommandBus\RetryingCommandBus
+    decorates: streak.command_bus
+    arguments:
+    - '@streak.command_bus.retrying.inner'
+    - '%streak.command_retry_max_attempts%'
 
   streak.event_store.postgres.pdo:
     class: Streak\Infrastructure\EventStore\PDOPostgresEventStore
