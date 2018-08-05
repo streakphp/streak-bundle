@@ -3,12 +3,15 @@ version: 2
 jobs:
   build:
     docker:
-      - image: streakphp/php:latest
+    - image: streakphp/php72-cli:latest
+      environment:
+      - COMPOSER_NO_INTERACTION=1
+      - COMPOSER_ALLOW_SUPERUSER=1
     working_directory: ~/streak-bundle
     steps:
       - checkout
 
-      - run: sudo composer self-update
+      - run: composer self-update
       - restore_cache:
           keys:
             - composer-v1-{{ checksum "composer.json" }}
@@ -20,7 +23,7 @@ jobs:
             - vendor/
 
       - run: bin/php-cs-fixer fix --config=.php_cs.dist --diff --diff-format=udiff -v --show-progress=estimating --dry-run
-      - run: bin/phpunit
+      - run: php -d zend_extension=xdebug.so bin/phpunit
 
       - store_artifacts:
           path: build/code-coverage/

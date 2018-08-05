@@ -31,21 +31,21 @@ class RegisterListenerFactoriesCompilerPassTest extends TestCase
         $container = new ContainerBuilder();
         $container
             ->register('foo')
-            ->addTag('streak.listener.factory')
+            ->addTag('streak.listener_factory')
         ;
         $container
             ->register('bar')
-            ->addTag('streak.listener.factory')
+            ->addTag('streak.listener_factory')
         ;
         $container
             ->register('moo')
-            ->addTag('streak.listener.factory')
+            ->addTag('streak.listener_factory')
         ;
         $container
             ->register('nope')
         ;
 
-        $composite = $container->register('streak.listener.factory.composite');
+        $composite = $container->register('streak.composite.listener_factory');
         $this->process($container);
 
         $this->assertTrue($this->factoryRegistered($composite, 'foo'));

@@ -24,7 +24,7 @@ class RegisterCommandHandlersCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $composite = $container->findDefinition('streak.command_handler.composite');
+        $composite = $container->findDefinition('streak.composite.command_handler');
         $factories = $container->findTaggedServiceIds('streak.command_handler');
 
         foreach ($factories as $id => $tags) {

@@ -24,8 +24,8 @@ class RegisterAggregateFactoriesCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $composite = $container->findDefinition('streak.aggregate.factory.composite');
-        $factories = $container->findTaggedServiceIds('streak.aggregate.factory');
+        $composite = $container->findDefinition('streak.composite.aggregate_factory');
+        $factories = $container->findTaggedServiceIds('streak.aggregate_factory');
 
         foreach ($factories as $id => $tags) {
             $composite->addMethodCall('add', [new Reference($id)]);

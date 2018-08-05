@@ -31,9 +31,9 @@ class StreakBundle extends Bundle
 {
     public function build(ContainerBuilder $container)
     {
-        $container->registerForAutoconfiguration(AggregateRoot\Factory::class)->addTag('streak.aggregate.factory');
+        $container->registerForAutoconfiguration(AggregateRoot\Factory::class)->addTag('streak.aggregate_factory');
         $container->registerForAutoconfiguration(CommandHandler::class)->addTag('streak.command_handler');
-        $container->registerForAutoconfiguration(Listener\Factory::class)->addTag('streak.listener.factory');
+        $container->registerForAutoconfiguration(Listener\Factory::class)->addTag('streak.listener_factory');
 
         $container->addCompilerPass(new RegisterListenerFactoriesCompilerPass());
         $container->addCompilerPass(new CreateListenerSubscribersCompilerPass());

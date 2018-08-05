@@ -103,7 +103,7 @@ class RunSubscriptionsCommandTest extends TestCase
         $this->listeners = $this->getMockBuilder(Repository::class)->getMockForAbstractClass();
         $this->store = $this->getMockBuilder(EventStore::class)->getMockForAbstractClass();
         $this->stream = $this->getMockBuilder(FilterableStream::class)->getMockForAbstractClass();
-        $this->uow = new UnitOfWork($this->store);
+        $this->uow = new UnitOfWork\EventStoreUnitOfWork($this->store);
 
         $this->listener1 = $this->getMockBuilder(Listener::class)->getMockForAbstractClass();
         $this->listener2 = $this->getMockBuilder(Listener::class)->getMockForAbstractClass();

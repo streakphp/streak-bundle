@@ -31,21 +31,21 @@ class RegisterAggregateFactoriesCompilerPassTest extends TestCase
         $container = new ContainerBuilder();
         $container
             ->register('foo')
-            ->addTag('streak.aggregate.factory')
+            ->addTag('streak.aggregate_factory')
         ;
         $container
             ->register('bar')
-            ->addTag('streak.aggregate.factory')
+            ->addTag('streak.aggregate_factory')
         ;
         $container
             ->register('moo')
-            ->addTag('streak.aggregate.factory')
+            ->addTag('streak.aggregate_factory')
         ;
         $container
             ->register('nope')
         ;
 
-        $composite = $container->register('streak.aggregate.factory.composite');
+        $composite = $container->register('streak.composite.aggregate_factory');
         $this->process($container);
 
         $this->assertTrue($this->factoryRegistered($composite, 'foo'));

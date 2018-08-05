@@ -31,21 +31,21 @@ class RegisterListenerSubscribersCompilerPassTest extends TestCase
         $container = new ContainerBuilder();
         $container
             ->register('foo')
-            ->addTag('streak.listener.subscriber')
+            ->addTag('streak.listener_subscriber')
         ;
         $container
             ->register('bar')
-            ->addTag('streak.listener.subscriber')
+            ->addTag('streak.listener_subscriber')
         ;
         $container
             ->register('moo')
-            ->addTag('streak.listener.subscriber')
+            ->addTag('streak.listener_subscriber')
         ;
         $container
             ->register('nope')
         ;
 
-        $bus = $container->register('streak.event_bus.in_memory');
+        $bus = $container->register('streak.in_memory.event_bus');
         $this->process($container);
 
         $this->assertTrue($this->subscriberRegistered($bus, 'foo'));
