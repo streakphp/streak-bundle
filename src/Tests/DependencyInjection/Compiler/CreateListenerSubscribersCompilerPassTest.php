@@ -30,15 +30,15 @@ class CreateListenerSubscribersCompilerPassTest extends TestCase
         $container = new ContainerBuilder();
         $container
             ->register('foo')
-            ->addTag('streak.listener.factory')
+            ->addTag('streak.listener_factory')
         ;
         $container
             ->register('bar')
-            ->addTag('streak.listener.factory')
+            ->addTag('streak.listener_factory')
         ;
         $container
             ->register('moo')
-            ->addTag('streak.listener.factory')
+            ->addTag('streak.listener_factory')
         ;
         $container
             ->register('nope')
@@ -66,7 +66,7 @@ class CreateListenerSubscribersCompilerPassTest extends TestCase
             return false;
         }
 
-        if (false === $definition->hasTag('streak.listener.subscriber')) {
+        if (false === $definition->hasTag('streak.listener_subscriber')) {
             return false;
         }
 

@@ -24,8 +24,8 @@ class RegisterListenerFactoriesCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $composite = $container->findDefinition('streak.listener.factory.composite');
-        $factories = $container->findTaggedServiceIds('streak.listener.factory');
+        $composite = $container->findDefinition('streak.composite.listener_factory');
+        $factories = $container->findTaggedServiceIds('streak.listener_factory');
 
         foreach ($factories as $id => $tags) {
             $composite->addMethodCall('add', [new Reference($id)]);

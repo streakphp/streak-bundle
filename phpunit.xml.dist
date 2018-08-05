@@ -1,4 +1,4 @@
-<phpunit bootstrap="vendor/autoload.php" colors="true">
+<phpunit bootstrap="vendor/autoload.php" colors="true" cacheResult="true" cacheResultFile="build/.phpunit.result.cache">
     <testsuites>
         <testsuite name="StreakBundle for the Symfony Framework">
             <directory>src/Tests</directory>

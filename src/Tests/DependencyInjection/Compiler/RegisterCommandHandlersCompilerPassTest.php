@@ -45,7 +45,7 @@ class RegisterCommandHandlersCompilerPassTest extends TestCase
             ->register('nope')
         ;
 
-        $composite = $container->register('streak.command_handler.composite');
+        $composite = $container->register('streak.composite.command_handler');
         $this->process($container);
 
         $this->assertTrue($this->handlerRegistered($composite, 'foo'));
