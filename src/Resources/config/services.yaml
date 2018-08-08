@@ -18,21 +18,14 @@ services:
     - ['pconnect', ['%streak.redis.host%', '%streak.redis.port%']]
     - ['select', ['%streak.redis.database%']]
 
+  streak.json.serializer:
+    class: Streak\Infrastructure\Serializer\JsonSerializer
+
   streak.php.serializer:
     class: Streak\Infrastructure\Serializer\PhpSerializer
 
   streak.igbinary.serializer:
     class: Streak\Infrastructure\Serializer\IGBinarySerializer
-
-  streak.flat.event_converter:
-    class: Streak\Infrastructure\Event\Converter\FlatObjectConverter
-
-  streak.composite.event_converter:
-    class: Streak\Infrastructure\Event\Converter\CompositeConverter
-    arguments:
-      - '@streak.flat.event_converter'
-
-  streak.event_converter: '@streak.composite.event_converter'
 
   streak.event_store.unit_of_work:
     class: Streak\Infrastructure\UnitOfWork\EventStoreUnitOfWork
@@ -109,7 +102,7 @@ services:
     class: Streak\Infrastructure\EventStore\PDOPostgresEventStore
     arguments:
       - '@streak.postgres.pdo'
-      - '@streak.event_converter'
+      - '@streak.json.serializer'
 
   streak.event_store: '@streak.pdo.postgres.event_store'
 
@@ -182,7 +175,6 @@ services:
     tags:
       - { name: 'console.command' }
 
-  Streak\Domain\Event\Converter: '@streak.event_converter'
   Streak\Infrastructure\UnitOfWork: '@streak.unit_of_work'
   Streak\Domain\Event\Subscription\Factory: '@streak.subscription_factory'
   Streak\Domain\Event\Listener\Factory: '@streak.listener_factory'
