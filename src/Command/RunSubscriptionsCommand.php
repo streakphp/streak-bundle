@@ -53,10 +53,10 @@ class RunSubscriptionsCommand extends Command
 
             try {
                 foreach ($subscription->subscribeTo($this->store) as $event) {
-                    $this->uow->commit();
+                    iterator_to_array($this->uow->commit());
                     $this->uow->add($subscription);
                 }
-                $this->uow->commit();
+                iterator_to_array($this->uow->commit());
             } catch (\Throwable $e) {
                 $output->writeln($e->getMessage());
                 $output->writeln($e->getTraceAsString());
