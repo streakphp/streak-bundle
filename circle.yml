@@ -23,7 +23,7 @@ jobs:
             - vendor/
 
       - run: bin/php-cs-fixer fix --config=.php_cs.dist --diff --diff-format=udiff -v --show-progress=estimating --dry-run
-      - run: php -d zend_extension=xdebug.so bin/phpunit
+      - run: xphp bin/phpunit
 
       - store_artifacts:
           path: build/code-coverage/
