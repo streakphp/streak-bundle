@@ -1,16 +1,10 @@
 parameters:
-  streak.postgres.pdo.dsn: '%env(POSTGRES_PDO_DSN)%'
   streak.redis.host: 'localhost'
   streak.redis.port: 6379
   streak.redis.database: 1
   streak.command_retry_max_attempts: 0
 
 services:
-
-  streak.postgres.pdo:
-    class: Doctrine\DBAL\Driver\PDOConnection
-    arguments:
-      - '%streak.postgres.pdo.dsn%'
 
   streak.redis:
     class: Redis
@@ -105,13 +99,13 @@ services:
     - '@streak.retrying.command_bus.inner'
     - '%streak.command_retry_max_attempts%'
 
-  streak.pdo.postgres.event_store:
-    class: Streak\Infrastructure\EventStore\PDOPostgresEventStore
+  streak.dbal.postgres.event_store:
+    class: Streak\Infrastructure\EventStore\DbalPostgresEventStore
     arguments:
-      - '@streak.postgres.pdo'
+      - '@streak.dbal.postgres.event_store.connection'
       - '@streak.event_converter'
 
-  streak.event_store: '@streak.pdo.postgres.event_store'
+  streak.event_store: '@streak.dbal.postgres.event_store'
 
   streak.publishing.event_store:
     class: Streak\Infrastructure\EventStore\PublishingEventStore
@@ -179,6 +173,20 @@ services:
     class: Streak\StreakBundle\Command\ResetSnapshotsCommand
     arguments:
       - '@streak.snapshotter_storage'
+    tags:
+      - { name: 'console.command' }
+
+  streak.create_event_store.command:
+    class: Streak\StreakBundle\Command\CreateEventStoreSchemaCommand
+    arguments:
+      - '@streak.event_store'
+    tags:
+      - { name: 'console.command' }
+
+  streak.drop_event_store.command:
+    class: Streak\StreakBundle\Command\DropEventStoreSchemaCommand
+    arguments:
+      - '@streak.event_store'
     tags:
       - { name: 'console.command' }
 
