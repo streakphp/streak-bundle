@@ -6,6 +6,11 @@ parameters:
 
 services:
 
+  streak.clock.server_time:
+    class: Streak\Infrastructure\ServerTimeClock
+
+  streak.clock: '@streak.clock.server_time'
+
   streak.redis:
     class: Redis
     calls:
@@ -44,6 +49,8 @@ services:
 
   streak.event_sourced.subscription_factory:
     class: Streak\Domain\Event\Sourced\Subscription\Factory
+    arguments:
+      - '@streak.clock'
 
   streak.subscription_factory: '@streak.event_sourced.subscription_factory'
 
@@ -169,6 +176,14 @@ services:
     tags:
       - { name: 'console.command' }
 
+  streak.subscriptions_restart.command:
+    class: Streak\StreakBundle\Command\RestartSubscriptionsCommand
+    arguments:
+      - '@streak.subscription_repository'
+      - '@streak.unit_of_work'
+    tags:
+      - { name: 'console.command' }
+
   streak.reset_snasphots.command:
     class: Streak\StreakBundle\Command\ResetSnapshotsCommand
     arguments:
@@ -190,6 +205,7 @@ services:
     tags:
       - { name: 'console.command' }
 
+  Streak\Domain\Clock: '@streak.clock'
   Streak\Domain\Event\Converter: '@streak.event_converter'
   Streak\Infrastructure\UnitOfWork: '@streak.unit_of_work'
   Streak\Domain\Event\Subscription\Factory: '@streak.subscription_factory'
