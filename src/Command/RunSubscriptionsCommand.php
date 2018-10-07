@@ -41,7 +41,7 @@ class RunSubscriptionsCommand extends Command
     /**
      * @var ConsoleSectionOutput[]
      */
-    private $sections = [];
+    private $outputs = [];
 
     public function __construct(Repository $subscriptions)
     {
@@ -88,10 +88,12 @@ class RunSubscriptionsCommand extends Command
             $this->processes[] = $process = new Process($command);
             $process->start();
 
-            if ($output instanceof ConsoleOutputInterface) {
-                $this->sections[] = $output->section();
+            if ($output->getVerbosity() <= $output::VERBOSITY_VERBOSE) { // for verbosity below -vv we do not need real output sections
+                $this->outputs[] = $output; // no flickering with simple output
+            } elseif ($output instanceof ConsoleOutputInterface) {
+                $this->outputs[] = $output->section();
             } else {
-                $this->sections[] = $output;
+                $this->outputs[] = $output; // no flickering with simple output
             }
 
             while ($this->runningProcesses() >= $limit) {
@@ -174,10 +176,10 @@ class RunSubscriptionsCommand extends Command
     private function output() : void
     {
         foreach ($this->processes as $index => $process) {
-            if (false === isset($this->sections[$index])) {
+            if (false === isset($this->outputs[$index])) {
                 continue;
             }
-            $output = $this->sections[$index];
+            $output = $this->outputs[$index];
 
             $command = $process->getCommandLine();
             $command = explode(' ', $command);
@@ -234,7 +236,7 @@ class RunSubscriptionsCommand extends Command
                     // show when not quiet
                     $output->writeln($buffer, $output::VERBOSITY_NORMAL);
                 }
-                unset($this->sections[$index]);
+                unset($this->outputs[$index]);
             }
         }
         usleep(500000); // wait 500ms between refreshing output
