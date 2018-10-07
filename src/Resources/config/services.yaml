@@ -171,6 +171,13 @@ services:
     class: Streak\StreakBundle\Command\RunSubscriptionsCommand
     arguments:
       - '@streak.subscription_repository'
+    tags:
+      - { name: 'console.command' }
+
+  streak.subscription_run.command:
+    class: Streak\StreakBundle\Command\RunSubscriptionCommand
+    arguments:
+      - '@streak.subscription_repository'
       - '@streak.event_store'
       - '@streak.unit_of_work'
     tags:

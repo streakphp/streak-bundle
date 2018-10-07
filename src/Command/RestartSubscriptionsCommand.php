@@ -19,6 +19,7 @@ use Streak\Domain\Event\Subscription\Repository;
 use Streak\Infrastructure\UnitOfWork;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -41,11 +42,20 @@ class RestartSubscriptionsCommand extends Command
     {
         $this->setName('streak:subscriptions:restart');
         $this->setDescription('Restarts all subscriptions that underlying listener can be reset.');
+        $this->setDefinition([
+            new InputOption('include-completed', 'i', InputOption::VALUE_NONE, 'Specify if completed subscriptions should be included'),
+        ]);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $subscriptions = $this->subscriptions->all();
+        $filter = Repository\Filter::nothing();
+
+        if ($input->getOption('include-completed')) {
+            $filter = $filter->doNotIgnoreCompletedSubscriptions();
+        }
+
+        $subscriptions = $this->subscriptions->all($filter);
 
         foreach ($subscriptions as $subscription) {
             try {
@@ -55,7 +65,8 @@ class RestartSubscriptionsCommand extends Command
 
                 $output->writeln(sprintf('Subscription <info>%s</info> restart succeeded.', $this->name($subscription)));
             } catch (SubscriptionRestartNotPossible $exception) {
-                $output->writeln(sprintf('Subscription <info>%s</info> restart not supported.', $this->name($subscription)));
+                // show only for -v, -vv or -vvv
+                $output->writeln(sprintf('Subscription <info>%s</info> restart not supported.', $this->name($subscription)), $output::VERBOSITY_VERBOSE);
 
                 continue; // next subscriptions
             } catch (\Throwable $exception) {
