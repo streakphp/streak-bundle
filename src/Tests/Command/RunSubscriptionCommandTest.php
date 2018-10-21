@@ -183,10 +183,11 @@ OUTPUT;
 
 namespace Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest;
 
+use Streak\Domain\Event\Listener;
 use Streak\Domain\Id\UUID;
 use Symfony\Component\Console\Output\Output;
 
-class SubscriptionId1 extends UUID
+class SubscriptionId1 extends UUID implements Listener\Id
 {
 }
 
