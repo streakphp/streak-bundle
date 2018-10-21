@@ -135,9 +135,9 @@ class RestartSubscriptionsCommandTest extends TestCase
         $command->run(new StringInput(''), $this->output);
 
         $expected = <<<OUTPUT
-Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) restart succeeded.
-Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId3(33532423-9D4C-42A8-8ABC-7C6EF07FACE6) restart failed with "test exception thrown.".
-Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId4(4894347A-DFAF-4EE0-83A6-39E650818507) restart succeeded.
+Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId1(ec2be294-c07a-4198-a159-4551686f14f9) restart succeeded.
+Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId3(33532423-9d4c-42a8-8abc-7c6ef07face6) restart failed with "test exception thrown.".
+Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId4(4894347a-dfaf-4ee0-83a6-39e650818507) restart succeeded.
 
 OUTPUT;
         $this->assertEquals($expected, $this->output->output);
@@ -200,10 +200,10 @@ OUTPUT;
         $command->run(new StringInput(''), $this->output);
 
         $expected = <<<OUTPUT
-Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) restart succeeded.
-Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId2(71150509-D51A-4AF1-B541-63C384709452) restart not supported.
-Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId3(33532423-9D4C-42A8-8ABC-7C6EF07FACE6) restart failed with "test exception thrown.".
-Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId4(4894347A-DFAF-4EE0-83A6-39E650818507) restart succeeded.
+Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId1(ec2be294-c07a-4198-a159-4551686f14f9) restart succeeded.
+Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId2(71150509-d51a-4af1-b541-63c384709452) restart not supported.
+Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId3(33532423-9d4c-42a8-8abc-7c6ef07face6) restart failed with "test exception thrown.".
+Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId4(4894347a-dfaf-4ee0-83a6-39e650818507) restart succeeded.
 
 OUTPUT;
         $this->assertEquals($expected, $this->output->output);
@@ -266,9 +266,9 @@ OUTPUT;
         $command->run(new StringInput('--include-completed'), $this->output);
 
         $expected = <<<OUTPUT
-Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) restart succeeded.
-Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId3(33532423-9D4C-42A8-8ABC-7C6EF07FACE6) restart failed with "test exception thrown.".
-Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId4(4894347A-DFAF-4EE0-83A6-39E650818507) restart succeeded.
+Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId1(ec2be294-c07a-4198-a159-4551686f14f9) restart succeeded.
+Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId3(33532423-9d4c-42a8-8abc-7c6ef07face6) restart failed with "test exception thrown.".
+Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId4(4894347a-dfaf-4ee0-83a6-39e650818507) restart succeeded.
 
 OUTPUT;
         $this->assertEquals($expected, $this->output->output);
@@ -331,10 +331,10 @@ OUTPUT;
         $command->run(new StringInput('--include-completed'), $this->output);
 
         $expected = <<<OUTPUT
-Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) restart succeeded.
-Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId2(71150509-D51A-4AF1-B541-63C384709452) restart not supported.
-Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId3(33532423-9D4C-42A8-8ABC-7C6EF07FACE6) restart failed with "test exception thrown.".
-Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId4(4894347A-DFAF-4EE0-83A6-39E650818507) restart succeeded.
+Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId1(ec2be294-c07a-4198-a159-4551686f14f9) restart succeeded.
+Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId2(71150509-d51a-4af1-b541-63c384709452) restart not supported.
+Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId3(33532423-9d4c-42a8-8abc-7c6ef07face6) restart failed with "test exception thrown.".
+Subscription Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest\SubscriptionId4(4894347a-dfaf-4ee0-83a6-39e650818507) restart succeeded.
 
 OUTPUT;
         $this->assertEquals($expected, $this->output->output);
@@ -343,22 +343,23 @@ OUTPUT;
 
 namespace Streak\StreakBundle\Tests\Command\ResetSubscriptionsCommandTest;
 
+use Streak\Domain\Event\Listener;
 use Streak\Domain\Id\UUID;
 use Symfony\Component\Console\Output\Output;
 
-class SubscriptionId1 extends UUID
+class SubscriptionId1 extends UUID implements Listener\Id
 {
 }
 
-class SubscriptionId2 extends UUID
+class SubscriptionId2 extends UUID implements Listener\Id
 {
 }
 
-class SubscriptionId3 extends UUID
+class SubscriptionId3 extends UUID implements Listener\Id
 {
 }
 
-class SubscriptionId4 extends UUID
+class SubscriptionId4 extends UUID implements Listener\Id
 {
 }
 
