@@ -1,0 +1,8 @@
+services:
+  streak.listener.subscriptions_projector.factory:
+    class: Streak\Application\Listener\Subscriptions\Projector\Factory
+    arguments:
+      - '@streak.dbal.postgres.event_store.connection'
+      - '@streak.clock'
+    tags:
+      - 'streak.listener_factory'
