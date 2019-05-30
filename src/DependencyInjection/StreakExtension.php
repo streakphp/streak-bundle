@@ -29,6 +29,7 @@ class StreakExtension extends Extension
         $loader->load('services.yaml');
         $loader->load('command_handlers.yaml');
         $loader->load('query_handlers.yaml');
+        $loader->load('projectors.yaml');
     }
 
     public function getNamespace()
