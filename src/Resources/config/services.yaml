@@ -97,7 +97,21 @@ services:
     calls:
       - [ register, [ '@streak.command_handler' ] ]
 
-  streak.command_bus: '@streak.synchronous.command_bus'
+  streak.command_bus:
+    alias: 'streak.synchronous.command_bus'
+    public: true
+
+  streak.composite.query_handler:
+    class: Streak\Infrastructure\QueryHandler\CompositeQueryHandler
+
+  streak.query_handler: '@streak.composite.query_handler'
+
+  streak.synchronous.query_bus:
+    class: Streak\Infrastructure\QueryBus\SynchronousQueryBus
+    calls:
+      - [ register, [ '@streak.query_handler' ]]
+
+  streak.query_bus: '@streak.synchronous.query_bus'
 
   streak.retrying.command_bus:
     class: Streak\Infrastructure\CommandBus\RetryingCommandBus
@@ -112,7 +126,9 @@ services:
       - '@streak.dbal.postgres.event_store.connection'
       - '@streak.event_converter'
 
-  streak.event_store: '@streak.dbal.postgres.event_store'
+  streak.event_store:
+    alias: 'streak.dbal.postgres.event_store'
+    public: true
 
   streak.publishing.event_store:
     class: Streak\Infrastructure\EventStore\PublishingEventStore

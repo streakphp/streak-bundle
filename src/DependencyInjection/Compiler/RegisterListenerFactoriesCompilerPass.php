@@ -28,6 +28,13 @@ class RegisterListenerFactoriesCompilerPass implements CompilerPassInterface
         $factories = $container->findTaggedServiceIds('streak.listener_factory');
 
         foreach ($factories as $id => $tags) {
+            $service = $container->findDefinition($id);
+
+            // we skip decorators
+            if (null !== $service->getDecoratedService()) {
+                continue;
+            }
+
             $composite->addMethodCall('add', [new Reference($id)]);
         }
     }

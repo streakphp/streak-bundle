@@ -44,6 +44,11 @@ class RegisterCommandHandlersCompilerPassTest extends TestCase
         $container
             ->register('nope')
         ;
+        $container
+            ->register('moo.decorator')
+            ->addTag('streak.command_handler')
+            ->setDecoratedService('moo')
+        ;
 
         $composite = $container->register('streak.composite.command_handler');
         $this->process($container);
