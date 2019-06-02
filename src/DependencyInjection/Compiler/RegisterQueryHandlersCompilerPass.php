@@ -20,12 +20,12 @@ use Symfony\Component\DependencyInjection\Reference;
 /**
  * @author Alan Gabriel Bem <alan.bem@gmail.com>
  */
-class RegisterCommandHandlersCompilerPass implements CompilerPassInterface
+class RegisterQueryHandlersCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $composite = $container->findDefinition('streak.composite.command_handler');
-        $factories = $container->findTaggedServiceIds('streak.command_handler');
+        $composite = $container->findDefinition('streak.composite.query_handler');
+        $factories = $container->findTaggedServiceIds('streak.query_handler');
 
         foreach ($factories as $id => $tags) {
             $service = $container->findDefinition($id);

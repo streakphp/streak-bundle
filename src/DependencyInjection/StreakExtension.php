@@ -27,6 +27,8 @@ class StreakExtension extends Extension
     {
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yaml');
+        $loader->load('command_handlers.yaml');
+        $loader->load('query_handlers.yaml');
     }
 
     public function getNamespace()

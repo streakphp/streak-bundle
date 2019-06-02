@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Streak\StreakBundle\Tests\DependencyInjection\Compiler;
 
 use PHPUnit\Framework\TestCase;
-use Streak\StreakBundle\DependencyInjection\Compiler\RegisterListenerFactoriesCompilerPass;
+use Streak\StreakBundle\DependencyInjection\Compiler\RegisterQueryHandlersCompilerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
@@ -22,53 +22,53 @@ use Symfony\Component\DependencyInjection\Reference;
 /**
  * @author Alan Gabriel Bem <alan.bem@gmail.com>
  *
- * @covers \Streak\StreakBundle\DependencyInjection\Compiler\RegisterListenerFactoriesCompilerPass
+ * @covers \Streak\StreakBundle\DependencyInjection\Compiler\RegisterQueryHandlersCompilerPass
  */
-class RegisterListenerFactoriesCompilerPassTest extends TestCase
+class RegisterQueryHandlersCompilerPassTest extends TestCase
 {
     public function testProcess()
     {
         $container = new ContainerBuilder();
         $container
             ->register('foo')
-            ->addTag('streak.listener_factory')
+            ->addTag('streak.query_handler')
         ;
         $container
             ->register('bar')
-            ->addTag('streak.listener_factory')
+            ->addTag('streak.query_handler')
         ;
         $container
             ->register('moo')
-            ->addTag('streak.listener_factory')
+            ->addTag('streak.query_handler')
         ;
         $container
             ->register('nope')
         ;
         $container
             ->register('moo.decorator')
-            ->addTag('streak.listener_factory')
+            ->addTag('streak.query_handler')
             ->setDecoratedService('moo')
         ;
 
-        $composite = $container->register('streak.composite.listener_factory');
+        $composite = $container->register('streak.composite.query_handler');
         $this->process($container);
 
-        $this->assertTrue($this->factoryRegistered($composite, 'foo'));
-        $this->assertTrue($this->factoryRegistered($composite, 'bar'));
-        $this->assertTrue($this->factoryRegistered($composite, 'moo'));
-        $this->assertFalse($this->factoryRegistered($composite, 'nope'));
+        $this->assertTrue($this->handlerRegistered($composite, 'foo'));
+        $this->assertTrue($this->handlerRegistered($composite, 'bar'));
+        $this->assertTrue($this->handlerRegistered($composite, 'moo'));
+        $this->assertFalse($this->handlerRegistered($composite, 'nope'));
     }
 
-    private function factoryRegistered(Definition $composite, $id)
+    private function handlerRegistered(Definition $composite, $id) : bool
     {
         $calls = $composite->getMethodCalls();
-        $call = ['add', [new Reference($id)]];
+        $call = ['registerHandler', [new Reference($id)]];
 
         return false !== array_search($call, $calls);
     }
 
     private function process(ContainerBuilder $container)
     {
-        (new RegisterListenerFactoriesCompilerPass())->process($container);
+        (new RegisterQueryHandlersCompilerPass())->process($container);
     }
 }
