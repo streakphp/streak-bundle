@@ -21,6 +21,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\ConsoleSectionOutput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -51,11 +52,14 @@ class RunSubscriptionCommand extends Command
         $this->setDefinition([
             new InputArgument('subscription-type', InputArgument::REQUIRED, 'Specify subscription type'),
             new InputArgument('subscription-id', InputArgument::REQUIRED, 'Specify subscription id'),
+            new InputOption('events-commit-threshold', null, InputOption::VALUE_OPTIONAL, 'Number of events that listener can listen to before changes are committed', 1),
         ]);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $threshold = (int) $input->getOption('events-commit-threshold');
+
         $subscription = $this->subscriptions->find($this->id($input));
 
         if (null === $subscription) {
@@ -82,15 +86,33 @@ class RunSubscriptionCommand extends Command
         $output->writeln(''); // streak:subscriptions:run requires this for splitting the output
 
         try {
+            $listened = 0;
+            $this->uow->add($subscription);
             foreach ($subscription->subscribeTo($this->store) as $event) {
-                iterator_to_array($this->uow->commit());
-                $this->uow->add($subscription);
+                ++$listened; // listened since last commit
+
+                if ($listened === $threshold) { // time to commit
+                    iterator_to_array($this->uow->commit());
+                    $this->uow->add($subscription);
+
+                    if ($output instanceof ConsoleSectionOutput) {
+                        $output->clear(); // @codeCoverageIgnore
+                    }
+                    $progress->advance($listened);
+                    $output->writeln('');
+
+                    $listened = 0; // reset the counter
+                }
+            }
+
+            if (0 !== $listened) { // some events left output
                 if ($output instanceof ConsoleSectionOutput) {
                     $output->clear(); // @codeCoverageIgnore
                 }
-                $progress->advance();
-                $output->writeln(''); // streak:subscriptions:run requires this for splitting the output
+                $progress->advance($listened);
+                $output->writeln('');
             }
+
             iterator_to_array($this->uow->commit());
         } finally {
             $this->uow->clear();
