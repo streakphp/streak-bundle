@@ -62,6 +62,21 @@ class RunSubscriptionCommandTest extends TestCase
     private $event2;
 
     /**
+     * @var Event|MockObject
+     */
+    private $event3;
+
+    /**
+     * @var Event|MockObject
+     */
+    private $event4;
+
+    /**
+     * @var Event|MockObject
+     */
+    private $event5;
+
+    /**
      * @var OutputInterface|MockObject
      */
     private $output;
@@ -76,6 +91,9 @@ class RunSubscriptionCommandTest extends TestCase
 
         $this->event1 = $this->getMockBuilder(Event::class)->setMockClassName('event1')->getMockForAbstractClass();
         $this->event2 = $this->getMockBuilder(Event::class)->setMockClassName('event2')->getMockForAbstractClass();
+        $this->event3 = $this->getMockBuilder(Event::class)->setMockClassName('event3')->getMockForAbstractClass();
+        $this->event4 = $this->getMockBuilder(Event::class)->setMockClassName('event4')->getMockForAbstractClass();
+        $this->event5 = $this->getMockBuilder(Event::class)->setMockClassName('event5')->getMockForAbstractClass();
 
         $this->output = new RunSubscriptionCommandTest\TestOutput();
     }
@@ -113,6 +131,80 @@ Subscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\Subscr
 \r\e[2KSubscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    1 events in < 1 sec.
 \r\e[2KSubscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    2 events in < 1 sec.
 \r\e[2KSubscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    2 events in < 1 sec.
+OUTPUT;
+        $this->assertEquals($expected, $this->output->output);
+    }
+
+    public function testCommandWithThresholdEqualingNumberOfProcessedEvents()
+    {
+        $this->repository
+            ->expects($this->once())
+            ->method('find')
+            ->with(SubscriptionId1::fromString('EC2BE294-C07A-4198-A159-4551686F14F9'))
+            ->willReturn($this->subscription1)
+        ;
+
+        $this->subscription1
+            ->expects($this->once())
+            ->method('subscribeTo')
+            ->with($this->store)
+            ->willReturn([$this->event1, $this->event2])
+        ;
+
+        $this->uow
+            ->expects($this->exactly(2))
+            ->method('commit')
+        ;
+        $this->uow
+            ->expects($this->exactly(1))
+            ->method('clear')
+        ;
+
+        $command = new RunSubscriptionCommand($this->repository, $this->store, $this->uow);
+        $command->run(new ArrayInput(['subscription-type' => 'Streak\\StreakBundle\\Tests\\Command\\RunSubscriptionCommandTest\\SubscriptionId1', 'subscription-id' => 'EC2BE294-C07A-4198-A159-4551686F14F9', '--events-commit-threshold' => 2]), $this->output);
+
+        $expected = <<<OUTPUT
+Subscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    0 events in < 1 sec.
+\r\e[2KSubscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    2 events in < 1 sec.
+\r\e[2KSubscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    2 events in < 1 sec.
+OUTPUT;
+        $this->assertEquals($expected, $this->output->output);
+    }
+
+    public function testCommandWithThresholdEqualingMoreThanTwiceTheNumberOfProcessedEvents()
+    {
+        $this->repository
+            ->expects($this->once())
+            ->method('find')
+            ->with(SubscriptionId1::fromString('EC2BE294-C07A-4198-A159-4551686F14F9'))
+            ->willReturn($this->subscription1)
+        ;
+
+        $this->subscription1
+            ->expects($this->once())
+            ->method('subscribeTo')
+            ->with($this->store)
+            ->willReturn([$this->event1, $this->event2, $this->event3, $this->event4, $this->event5])
+        ;
+
+        $this->uow
+            ->expects($this->exactly(3))
+            ->method('commit')
+        ;
+        $this->uow
+            ->expects($this->exactly(1))
+            ->method('clear')
+        ;
+
+        $command = new RunSubscriptionCommand($this->repository, $this->store, $this->uow);
+        $command->run(new ArrayInput(['subscription-type' => 'Streak\\StreakBundle\\Tests\\Command\\RunSubscriptionCommandTest\\SubscriptionId1', 'subscription-id' => 'EC2BE294-C07A-4198-A159-4551686F14F9', '--events-commit-threshold' => 2]), $this->output);
+
+        $expected = <<<OUTPUT
+Subscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    0 events in < 1 sec.
+\r\e[2KSubscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    2 events in < 1 sec.
+\r\e[2KSubscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    4 events in < 1 sec.
+\r\e[2KSubscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    5 events in < 1 sec.
+\r\e[2KSubscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    5 events in < 1 sec.
 OUTPUT;
         $this->assertEquals($expected, $this->output->output);
     }
