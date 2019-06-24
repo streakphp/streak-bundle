@@ -2,6 +2,7 @@ services:
   streak.aggregate_root.command_handlers:
     class: Streak\Application\CommandHandler\AggregateRootHandler
     arguments:
+      - '@streak.composite.aggregate_factory'
       - '@streak.aggregate_repository'
     tags:
       - 'streak.command_handler'
