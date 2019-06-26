@@ -67,7 +67,13 @@ services:
       - '@streak.event_store'
       - '@streak.unit_of_work'
 
-  streak.subscription_repository: '@streak.event_sourced.subscription_repository'
+  streak.subscriptions_projection.subscription_repository:
+    class: Streak\Infrastructure\Event\Subscription\ProjectionRepository
+    arguments:
+      - '@streak.event_sourced.subscription_repository'
+      - '@streak.query_bus'
+
+  streak.subscription_repository: '@streak.subscriptions_projection.subscription_repository'
 
   streak.null.event_bus:
     class: Streak\Infrastructure\EventBus\NullEventBus
@@ -237,6 +243,7 @@ services:
   Streak\Domain\EventBus: '@streak.event_bus'
   Streak\Application\CommandHandler: '@streak.command_handler'
   Streak\Application\CommandBus: '@streak.command_bus'
+  Streak\Application\QueryBus: '@streak.query_bus'
   Streak\Domain\EventStore: '@streak.event_store'
   Streak\Domain\AggregateRoot\Factory: '@streak.aggregate_factory'
   Streak\Infrastructure\AggregateRoot\Snapshotter: '@streak.snapshotter'
