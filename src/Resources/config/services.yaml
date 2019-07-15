@@ -149,12 +149,10 @@ services:
     arguments:
       - '@streak.redis'
 
-  streak.snapshotter_storage: '@streak.redis.snapshotter_storage'
+  streak.in_memory.snapshotter_storage:
+    class: Streak\Infrastructure\AggregateRoot\Snapshotter\Storage\InMemoryStorage
 
-  streak.serializable_aggregates.snapshotter:
-    class: Streak\Infrastructure\AggregateRoot\Snapshotter\SerializableAggregatesSnapshotter
-    arguments:
-      - '@streak.snapshotter_storage'
+  streak.snapshotter_storage: '@streak.redis.snapshotter_storage'
 
   streak.snapshottable_aggregates.snapshotter:
     class: Streak\Infrastructure\AggregateRoot\Snapshotter\SnapshottableAggregatesSnapshotter
@@ -164,12 +162,6 @@ services:
 
   streak.null.snapshotter:
     class: Streak\Infrastructure\AggregateRoot\Snapshotter\NullSnapshotter
-
-  streak.composite.snapshotter:
-    class: Streak\Infrastructure\AggregateRoot\Snapshotter\CompositeSnapshotter
-    arguments:
-    - '@streak.serializable_aggregates.snapshotter'
-    - '@streak.snapshottable_aggregates.snapshotter'
 
   streak.snapshotter: '@streak.null.snapshotter'
 
