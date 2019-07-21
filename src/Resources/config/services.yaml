@@ -111,7 +111,9 @@ services:
     calls:
       - [ register, [ '@streak.query_handler' ]]
 
-  streak.query_bus: '@streak.synchronous.query_bus'
+  streak.query_bus:
+    alias: 'streak.synchronous.query_bus'
+    public: true
 
   streak.retrying.command_bus:
     class: Streak\Infrastructure\CommandBus\RetryingCommandBus
