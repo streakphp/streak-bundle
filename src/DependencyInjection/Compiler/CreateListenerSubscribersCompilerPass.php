@@ -34,7 +34,6 @@ class CreateListenerSubscribersCompilerPass implements CompilerPassInterface
                 new Reference($id),
                 new Reference('streak.subscription_factory'),
                 new Reference('streak.subscription_repository'),
-                new Reference('streak.unit_of_work'),
             ]);
             $subscriber->setPublic(false);
             $subscriber->addTag('streak.listener_subscriber');

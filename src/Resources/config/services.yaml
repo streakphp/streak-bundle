@@ -36,7 +36,7 @@ services:
   streak.event_store.unit_of_work:
     class: Streak\Infrastructure\UnitOfWork\EventStoreUnitOfWork
     arguments:
-    - '@streak.event_store'
+      - '@streak.event_store'
 
   streak.unit_of_work: '@streak.event_store.unit_of_work'
 
@@ -48,9 +48,16 @@ services:
       - '@streak.snapshotter'
 
   streak.event_sourced.subscription_factory:
-    class: Streak\Domain\Event\Sourced\Subscription\Factory
+    class: Streak\Infrastructure\Event\Sourced\Subscription\Factory
     arguments:
       - '@streak.clock'
+
+  streak.event_sourced.transactional_subscription_factory:
+    class: Streak\Infrastructure\Event\Sourced\TransactionalSubscription\Factory
+    decorates: streak.event_sourced.subscription_factory
+    arguments:
+      - '@streak.event_sourced.transactional_subscription_factory.inner'
+      - '@streak.unit_of_work'
 
   streak.subscription_factory: '@streak.event_sourced.subscription_factory'
 
@@ -189,15 +196,13 @@ services:
     arguments:
       - '@streak.subscription_repository'
       - '@streak.event_store'
-      - '@streak.unit_of_work'
     tags:
       - { name: 'console.command' }
 
-  streak.subscriptions_restart.command:
-    class: Streak\StreakBundle\Command\RestartSubscriptionsCommand
+  streak.subscription_restart.command:
+    class: Streak\StreakBundle\Command\RestartSubscriptionCommand
     arguments:
       - '@streak.subscription_repository'
-      - '@streak.unit_of_work'
     tags:
       - { name: 'console.command' }
 

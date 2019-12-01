@@ -31,6 +31,8 @@ use Symfony\Component\Process\Process;
  */
 class RunSubscriptionsCommand extends Command
 {
+    public const TERMINAL_CLEAR_LINE = "\r\e[2K";
+
     private $subscriptions;
 
     /**
@@ -181,13 +183,7 @@ class RunSubscriptionsCommand extends Command
             }
             $output = $this->outputs[$index];
 
-            $command = $process->getCommandLine();
-            $command = explode(' ', $command);
-            $command[0] = trim($command[0], "'"); // trim 'php' executable
-            $command[1] = trim($command[1], "'"); // trim 'bin/console'
-            $command[2] = trim($command[2], "'"); // trim 'streak:subscription:run'
-            $command = implode(' ', $command);
-            $command = '<fg=green>'.$command.'</>';
+            $command = $this->extractAndDecorateCommand($process);
 
             $terminated = $process->isTerminated();
             $success = $process->isSuccessful();
@@ -195,28 +191,31 @@ class RunSubscriptionsCommand extends Command
             $buffer = trim($buffer);
 
             if ('' !== $buffer) {
-                $buffer = explode(PHP_EOL, $buffer);
+                $buffer = explode(self::TERMINAL_CLEAR_LINE, $buffer); // split progress bar steps
                 $buffer = array_pop($buffer);
                 $buffer = $this->decorate($buffer);
 
                 if ($output instanceof ConsoleSectionOutput) {
                     $output->clear();
                 }
-                // show only when -vv or -vvv
-                $output->writeln('🍿 '.$command.' running', $output::VERBOSITY_VERY_VERBOSE);
-                $output->writeln($buffer, $output::VERBOSITY_VERY_VERBOSE);
+                $output->writeln('🍿 '.$command.' running', $output::VERBOSITY_VERY_VERBOSE); // show only when -vv or -vvv
+                $output->writeln($buffer, $output::VERBOSITY_VERY_VERBOSE); // show only when -vv or -vvv
             }
 
             if (true === $terminated) {
                 if (true === $success) {
-                    $command = '✅ '.$command;
+                    $command = '✅ '.$command.' succeeded';
                 } else {
-                    $command = '🔥 '.$command;
+                    if ($output instanceof ConsoleOutputInterface) {
+                        $output = $output->getErrorOutput(); // when verbosity is -v we can actualy write to stderr
+                    }
+                    $command = '🔥 '.$command.' failed';
                 }
 
+                // lets display remaining stdout output...
                 $buffer = $process->getOutput();
                 $buffer = trim($buffer);
-                $buffer = explode(PHP_EOL, $buffer);
+                $buffer = explode(self::TERMINAL_CLEAR_LINE, $buffer); // split progress bar steps
                 $buffer = array_pop($buffer);
                 $buffer = trim($buffer);
                 $buffer = $this->decorate($buffer);
@@ -224,21 +223,33 @@ class RunSubscriptionsCommand extends Command
                 if ($output instanceof ConsoleSectionOutput) {
                     $output->clear();
                 }
-                // show when not --quiet
-                $output->writeln($command.' terminated', $output::VERBOSITY_NORMAL);
-                $output->writeln($buffer, $output::VERBOSITY_NORMAL); // show when not quiet
+                $output->writeln($command, $output::VERBOSITY_NORMAL); // show when not --quiet
+                $output->writeln($buffer, $output::VERBOSITY_NORMAL); // show when not --quiet
 
+                // ...and top it off with stderr output if any
                 if (false === $success) {
                     $buffer = $process->getErrorOutput();
                     $buffer = trim($buffer);
                     $buffer = sprintf('<error>%s</error>', $buffer);
 
-                    // show when not quiet
-                    $output->writeln($buffer, $output::VERBOSITY_NORMAL);
+                    $output->writeln($buffer, $output::VERBOSITY_NORMAL); // show when not quiet
                 }
                 unset($this->outputs[$index]);
             }
         }
         usleep(500000); // wait 500ms between refreshing output
+    }
+
+    private function extractAndDecorateCommand(Process $process) : string
+    {
+        $command = $process->getCommandLine();
+        $command = explode(' ', $command);
+        $command[0] = trim($command[0], "'"); // trim 'php' executable
+        $command[1] = trim($command[1], "'"); // trim 'bin/console'
+        $command[2] = trim($command[2], "'"); // trim 'streak:subscription:run'
+        $command = implode(' ', $command);
+        $command = '<fg=green>'.$command.'</>';
+
+        return $command;
     }
 }
