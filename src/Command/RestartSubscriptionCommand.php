@@ -14,35 +14,32 @@ declare(strict_types=1);
 namespace Streak\StreakBundle\Command;
 
 use Streak\Domain\Event\Listener;
+use Streak\Domain\Event\Subscription\Exception\SubscriptionRestartNotPossible;
 use Streak\Domain\Event\Subscription\Repository;
-use Streak\Domain\EventStore;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Output\StreamOutput;
 
 /**
  * @author Alan Gabriel Bem <alan.bem@gmail.com>
  */
-class RunSubscriptionCommand extends Command
+class RestartSubscriptionCommand extends Command
 {
     private $subscriptions;
-    private $store;
 
-    public function __construct(Repository $subscriptions, EventStore $store)
+    public function __construct(Repository $subscriptions)
     {
         $this->subscriptions = $subscriptions;
-        $this->store = $store;
 
         parent::__construct();
     }
 
     protected function configure()
     {
-        $this->setName('streak:subscription:run');
-        $this->setDescription('Runs single subscription (sagas, process managers, projectors, etc)');
+        $this->setName('streak:subscription:restart');
+        $this->setDescription('Restart single subscription');
         $this->setDefinition([
             new InputArgument('subscription-type', InputArgument::REQUIRED, 'Specify subscription type'),
             new InputArgument('subscription-id', InputArgument::REQUIRED, 'Specify subscription id'),
@@ -51,35 +48,35 @@ class RunSubscriptionCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $subscription = $this->subscriptions->find($this->id($input));
+        $id = $this->id($input);
+        $subscription = $this->subscriptions->find($id);
 
         if (null === $subscription) {
-            $output->write(sprintf('Subscription <fg=blue>%s</>(<fg=cyan>%s</>) not found.', $input->getArgument('subscription-type'), $input->getArgument('subscription-id')));
+            $output->writeln(sprintf('Subscription %s not found.', $this->name($id)));
 
             return;
         }
 
-        ProgressBar::setFormatDefinition('custom', 'Subscription <fg=blue>%subscription_type%</>(<fg=cyan>%subscription_id%</>) processed <fg=yellow>%current%</> events in <fg=magenta>%elapsed%</>.');
-
-        // progress bar by default is writing to stderr, lets try to mitigate that
-        if ($output instanceof StreamOutput) {
-            $output = new StreamOutput($output->getStream(), $output->getVerbosity(), null, $output->getFormatter()); // @codeCoverageIgnore
-        }
-
-        $progress = new ProgressBar($output);
-        $progress->setFormat('custom');
-        $progress->setOverwrite(true);
-        $progress->setMessage($input->getArgument('subscription-type'), 'subscription_type');
-        $progress->setMessage($input->getArgument('subscription-id'), 'subscription_id');
-        $progress->display();
-
         try {
-            foreach ($subscription->subscribeTo($this->store) as $event) {
-                $progress->advance();
+            $subscription->restart();
+
+            $output->writeln(sprintf('Subscription %s restart succeeded.', $this->name($id)));
+        } catch (SubscriptionRestartNotPossible $exception) {
+            $output->writeln(sprintf('Subscription %s restart not supported.', $this->name($id)));
+        } catch (\Throwable $exception) {
+            // lets write to stderr if possible
+            if ($output instanceof ConsoleOutputInterface) {
+                $output = $output->getErrorOutput(); // @codeCoverageIgnore
             }
-        } finally {
-            $progress->finish();
+            $output->writeln(sprintf('Subscription %s restart failed.', $this->name($id)));
+
+            throw $exception;
         }
+    }
+
+    private function name(Listener\Id $id) : string
+    {
+        return sprintf('<fg=blue>%s</>(<fg=cyan>%s</>)', get_class($id), $id->toString());
     }
 
     private function id(InputInterface $input) : Listener\Id
