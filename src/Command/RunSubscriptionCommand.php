@@ -20,6 +20,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\StreamOutput;
 
@@ -46,6 +47,7 @@ class RunSubscriptionCommand extends Command
         $this->setDefinition([
             new InputArgument('subscription-type', InputArgument::REQUIRED, 'Specify subscription type'),
             new InputArgument('subscription-id', InputArgument::REQUIRED, 'Specify subscription id'),
+            new InputOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Maximum number of events subscription can listen to', 1000),
         ]);
     }
 
@@ -58,6 +60,8 @@ class RunSubscriptionCommand extends Command
 
             return;
         }
+
+        $limit = (int) $input->getOption('limit');
 
         ProgressBar::setFormatDefinition('custom', 'Subscription <fg=blue>%subscription_type%</>(<fg=cyan>%subscription_id%</>) processed <fg=yellow>%current%</> events in <fg=magenta>%elapsed%</>.');
 
@@ -74,7 +78,7 @@ class RunSubscriptionCommand extends Command
         $progress->display();
 
         try {
-            foreach ($subscription->subscribeTo($this->store) as $event) {
+            foreach ($subscription->subscribeTo($this->store, $limit) as $event) {
                 $progress->advance();
             }
         } finally {
