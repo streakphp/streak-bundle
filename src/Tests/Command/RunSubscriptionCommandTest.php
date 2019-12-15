@@ -106,12 +106,39 @@ class RunSubscriptionCommandTest extends TestCase
         $this->subscription1
             ->expects($this->once())
             ->method('subscribeTo')
-            ->with($this->store)
+            ->with($this->store, 1000) // 1000 is default --limit
             ->willReturn([$this->event1, $this->event2])
         ;
 
         $command = new RunSubscriptionCommand($this->repository, $this->store);
         $command->run(new ArrayInput(['subscription-type' => 'Streak\\StreakBundle\\Tests\\Command\\RunSubscriptionCommandTest\\SubscriptionId1', 'subscription-id' => 'EC2BE294-C07A-4198-A159-4551686F14F9']), $this->output);
+
+        $expected =
+            "Subscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    0 events in < 1 sec.".
+            self::TERMINAL_CLEAR_LINE.
+            "Subscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    2 events in < 1 sec."
+        ;
+        $this->assertEquals($expected, $this->output->output);
+    }
+
+    public function testCommandWithLimit()
+    {
+        $this->repository
+            ->expects($this->once())
+            ->method('find')
+            ->with(SubscriptionId1::fromString('EC2BE294-C07A-4198-A159-4551686F14F9'))
+            ->willReturn($this->subscription1)
+        ;
+
+        $this->subscription1
+            ->expects($this->once())
+            ->method('subscribeTo')
+            ->with($this->store, 763723)
+            ->willReturn([$this->event1, $this->event2])
+        ;
+
+        $command = new RunSubscriptionCommand($this->repository, $this->store);
+        $command->run(new ArrayInput(['subscription-type' => 'Streak\\StreakBundle\\Tests\\Command\\RunSubscriptionCommandTest\\SubscriptionId1', 'subscription-id' => 'EC2BE294-C07A-4198-A159-4551686F14F9', '--limit' => 763723]), $this->output);
 
         $expected =
             "Subscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    0 events in < 1 sec.".
