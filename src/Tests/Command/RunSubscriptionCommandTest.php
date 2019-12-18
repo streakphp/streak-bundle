@@ -106,7 +106,7 @@ class RunSubscriptionCommandTest extends TestCase
         $this->subscription1
             ->expects($this->once())
             ->method('subscribeTo')
-            ->with($this->store, 1000) // 1000 is default --limit
+            ->with($this->store, null) // null is default --limit
             ->willReturn([$this->event1, $this->event2])
         ;
 
@@ -138,7 +138,7 @@ class RunSubscriptionCommandTest extends TestCase
         ;
 
         $command = new RunSubscriptionCommand($this->repository, $this->store);
-        $command->run(new ArrayInput(['subscription-type' => 'Streak\\StreakBundle\\Tests\\Command\\RunSubscriptionCommandTest\\SubscriptionId1', 'subscription-id' => 'EC2BE294-C07A-4198-A159-4551686F14F9', '--limit' => 763723]), $this->output);
+        $command->run(new ArrayInput(['subscription-type' => 'Streak\\StreakBundle\\Tests\\Command\\RunSubscriptionCommandTest\\SubscriptionId1', 'subscription-id' => 'EC2BE294-C07A-4198-A159-4551686F14F9', '--listening-limit' => 763723]), $this->output);
 
         $expected =
             "Subscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    0 events in < 1 sec.".

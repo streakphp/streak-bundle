@@ -58,7 +58,8 @@ class RunSubscriptionsCommand extends Command
         $this->setDescription('Runs all subscriptions (sagas, process managers, projectors, etc) in sub processes');
         $this->setDefinition([
             new InputArgument('type', InputArgument::IS_ARRAY, 'Specify types of subscriptions to run'),
-            new InputOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Specify how many subscriptions should be run at once', 10),
+            new InputOption('concurrency-limit', 'l', InputOption::VALUE_OPTIONAL, 'Specify how many subscriptions can be run concurrently at most', 10),
+            new InputOption('listening-limit', null, InputOption::VALUE_OPTIONAL, 'Specify how many event can subscription listen to at most', null),
             new InputOption('php-executable', 'p', InputOption::VALUE_OPTIONAL, 'Specify "php" executable to run sub processes with', 'php'),
         ]);
     }
@@ -66,7 +67,7 @@ class RunSubscriptionsCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $types = (array) $input->getArgument('type');
-        $limit = (int) $input->getOption('limit');
+        $limit = (int) $input->getOption('concurrency-limit');
         $filter = Repository\Filter::nothing();
 
         if (count($types) > 0) {
@@ -85,6 +86,7 @@ class RunSubscriptionsCommand extends Command
 
             $command = $this->command($subscription);
             $command = $this->verbosity($command, $output);
+            $command = $this->listeningLimit($command, $input);
             $command = $this->executable($command, $input);
 
             $this->processes[] = $process = new Process($command);
@@ -145,6 +147,17 @@ class RunSubscriptionsCommand extends Command
         }
         if ($output->getVerbosity() === $output::VERBOSITY_DEBUG) {
             $command[] = '-vvv';
+        }
+
+        return $command;
+    }
+
+    private function listeningLimit(array $command, InputInterface $input) : array
+    {
+        $limit = $input->getOption('listening-limit');
+
+        if (null !== $limit) {
+            $command[] = '--listening-limit='.(int) $limit;
         }
 
         return $command;
