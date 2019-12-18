@@ -47,7 +47,7 @@ class RunSubscriptionCommand extends Command
         $this->setDefinition([
             new InputArgument('subscription-type', InputArgument::REQUIRED, 'Specify subscription type'),
             new InputArgument('subscription-id', InputArgument::REQUIRED, 'Specify subscription id'),
-            new InputOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Maximum number of events subscription can listen to', 1000),
+            new InputOption('listening-limit', 'l', InputOption::VALUE_OPTIONAL, 'Maximum number of events subscription can listen to', null),
         ]);
     }
 
@@ -61,7 +61,11 @@ class RunSubscriptionCommand extends Command
             return;
         }
 
-        $limit = (int) $input->getOption('limit');
+        $limit = $input->getOption('listening-limit');
+
+        if (null !== $limit) {
+            $limit = (int) $limit;
+        }
 
         ProgressBar::setFormatDefinition('custom', 'Subscription <fg=blue>%subscription_type%</>(<fg=cyan>%subscription_id%</>) processed <fg=yellow>%current%</> events in <fg=magenta>%elapsed%</>.');
 
