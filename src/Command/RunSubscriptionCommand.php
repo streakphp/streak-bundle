@@ -53,6 +53,21 @@ class RunSubscriptionCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        ProgressBar::setFormatDefinition('custom', 'Subscription <fg=blue>%subscription_type%</>(<fg=cyan>%subscription_id%</>) processed <fg=yellow>%current%</> events in <fg=magenta>%elapsed%</>.');
+
+        // progress bar by default is writing to stderr, lets try to mitigate that
+        if ($output instanceof StreamOutput) {
+            $output = new StreamOutput($output->getStream(), $output->getVerbosity(), null, $output->getFormatter()); // @codeCoverageIgnore
+        }
+
+        // by instantiating progress bar here we start measuring time before we load subscription,
+        // so elapsed time will include subscription initialization period
+        $progress = new ProgressBar($output);
+        $progress->setFormat('custom');
+        $progress->setOverwrite(true);
+        $progress->setMessage($input->getArgument('subscription-type'), 'subscription_type');
+        $progress->setMessage($input->getArgument('subscription-id'), 'subscription_id');
+
         $subscription = $this->subscriptions->find($this->id($input));
 
         if (null === $subscription) {
@@ -67,18 +82,6 @@ class RunSubscriptionCommand extends Command
             $limit = (int) $limit;
         }
 
-        ProgressBar::setFormatDefinition('custom', 'Subscription <fg=blue>%subscription_type%</>(<fg=cyan>%subscription_id%</>) processed <fg=yellow>%current%</> events in <fg=magenta>%elapsed%</>.');
-
-        // progress bar by default is writing to stderr, lets try to mitigate that
-        if ($output instanceof StreamOutput) {
-            $output = new StreamOutput($output->getStream(), $output->getVerbosity(), null, $output->getFormatter()); // @codeCoverageIgnore
-        }
-
-        $progress = new ProgressBar($output);
-        $progress->setFormat('custom');
-        $progress->setOverwrite(true);
-        $progress->setMessage($input->getArgument('subscription-type'), 'subscription_type');
-        $progress->setMessage($input->getArgument('subscription-id'), 'subscription_id');
         $progress->display();
 
         try {
