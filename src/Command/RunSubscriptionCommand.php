@@ -17,6 +17,7 @@ use Streak\Domain\Event\Listener;
 use Streak\Domain\Event\Subscription\Repository;
 use Streak\Domain\EventStore;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\Helper;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -53,22 +54,9 @@ class RunSubscriptionCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        ProgressBar::setFormatDefinition('custom', 'Subscription <fg=blue>%subscription_type%</>(<fg=cyan>%subscription_id%</>) processed <fg=yellow>%current%</> events in <fg=magenta>%elapsed%</>.');
-
-        // progress bar by default is writing to stderr, lets try to mitigate that
-        if ($output instanceof StreamOutput) {
-            $output = new StreamOutput($output->getStream(), $output->getVerbosity(), null, $output->getFormatter()); // @codeCoverageIgnore
-        }
-
-        // by instantiating progress bar here we start measuring time before we load subscription,
-        // so elapsed time will include subscription initialization period
-        $progress = new ProgressBar($output);
-        $progress->setFormat('custom');
-        $progress->setOverwrite(true);
-        $progress->setMessage($input->getArgument('subscription-type'), 'subscription_type');
-        $progress->setMessage($input->getArgument('subscription-id'), 'subscription_id');
-
+        $start = time();
         $subscription = $this->subscriptions->find($this->id($input));
+        $initializedIn = time() - $start;
 
         if (null === $subscription) {
             $output->write(sprintf('Subscription <fg=blue>%s</>(<fg=cyan>%s</>) not found.', $input->getArgument('subscription-type'), $input->getArgument('subscription-id')));
@@ -82,6 +70,19 @@ class RunSubscriptionCommand extends Command
             $limit = (int) $limit;
         }
 
+        ProgressBar::setFormatDefinition('custom', 'Subscription <fg=blue>%subscription_type%</>(<fg=cyan>%subscription_id%</>) initialized in <fg=yellow>%initialized_in%</> and processed <fg=yellow>%current%</> events in <fg=magenta>%elapsed%</>.');
+
+        // progress bar by default is writing to stderr, lets try to mitigate that
+        if ($output instanceof StreamOutput) {
+            $output = new StreamOutput($output->getStream(), $output->getVerbosity(), null, $output->getFormatter()); // @codeCoverageIgnore
+        }
+
+        $progress = new ProgressBar($output);
+        $progress->setFormat('custom');
+        $progress->setOverwrite(true);
+        $progress->setMessage($input->getArgument('subscription-type'), 'subscription_type');
+        $progress->setMessage($input->getArgument('subscription-id'), 'subscription_id');
+        $progress->setMessage(Helper::formatTime($initializedIn), 'initialized_in');
         $progress->display();
 
         try {

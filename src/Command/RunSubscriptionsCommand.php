@@ -174,8 +174,8 @@ class RunSubscriptionsCommand extends Command
 
     private function decorate(string $string) : string
     {
-        $pattern = '/Subscription (.+)\((.+)\) processed (.+) events in (.+)./i';
-        $replacement = 'Subscription <fg=blue>$1</>(<fg=cyan>$2</>) processed <fg=yellow>$3</> events in <fg=magenta>$4</>.';
+        $pattern = '/Subscription (.+)\((.+)\) initialized in (.+) and processed (.+) events in (.+)./i';
+        $replacement = 'Subscription <fg=blue>$1</>(<fg=cyan>$2</>) initialized in <fg=yellow>$3</> and processed <fg=yellow>$4</> events in <fg=magenta>$5</>.';
         $decorated = preg_replace($pattern, $replacement, $string);
 
         if (null === $decorated) {
