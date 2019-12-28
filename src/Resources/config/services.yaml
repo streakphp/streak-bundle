@@ -52,12 +52,20 @@ services:
     arguments:
       - '@streak.clock'
 
-  streak.event_sourced.transactional_subscription_factory:
-    class: Streak\Infrastructure\Event\Sourced\TransactionalSubscription\Factory
+  streak.event_sourced.committing.subscription_factory:
+    class: Streak\Infrastructure\Event\Sourced\CommittingSubscription\Factory
     decorates: streak.event_sourced.subscription_factory
     arguments:
-      - '@streak.event_sourced.transactional_subscription_factory.inner'
+      - '@streak.event_sourced.committing.subscription_factory.inner'
       - '@streak.unit_of_work'
+
+  streak.dbal.transactional.subscription_factory:
+    class: Streak\Infrastructure\Event\Subscription\DbalTransactionalSubscription\Factory
+    decorates: streak.event_sourced.subscription_factory
+    arguments:
+      - '@streak.dbal.transactional.subscription_factory.inner'
+      - '@streak.dbal.postgres.event_store.connection'
+      - 1
 
   streak.subscription_factory: '@streak.event_sourced.subscription_factory'
 
@@ -89,11 +97,11 @@ services:
 
   streak.command_handler: '@streak.composite.command_handler'
 
-  streak.transactional_persistence.command_handler:
-    class: Streak\Infrastructure\CommandHandler\TransactionalPersistenceCommandHandler
+  streak.committing.command_handler:
+    class: Streak\Infrastructure\CommandHandler\CommittingCommandHandler
     decorates: streak.command_handler
     arguments:
-      - '@streak.transactional_persistence.command_handler.inner'
+      - '@streak.committing.command_handler.inner'
       - '@streak.unit_of_work'
 
   streak.null.command_bus:
