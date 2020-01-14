@@ -3,6 +3,7 @@ parameters:
   streak.redis.port: 6379
   streak.redis.database: 1
   streak.command_retry_max_attempts: 0
+  streak.snapshotting.interval: 1
 
 services:
 
@@ -46,6 +47,7 @@ services:
     arguments:
       - '@streak.snapshotting.unit_of_work.inner'
       - '@streak.snapshotter'
+      - '%streak.snapshotting.interval%'
 
   streak.event_sourced.subscription_factory:
     class: Streak\Infrastructure\Event\Sourced\Subscription\Factory
