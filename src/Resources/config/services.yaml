@@ -23,15 +23,15 @@ services:
   streak.igbinary.serializer:
     class: Streak\Infrastructure\Serializer\IGBinarySerializer
 
-  streak.flat.event_converter:
-    class: Streak\Infrastructure\Event\Converter\FlatObjectConverter
+  streak.nested.object_converter:
+    class: Streak\Infrastructure\Event\Converter\NestedObjectConverter
 
-  streak.composite.event_converter:
+  streak.composite.object_converter:
     class: Streak\Infrastructure\Event\Converter\CompositeConverter
     arguments:
-      - '@streak.flat.event_converter'
+      - '@streak.nested.object_converter'
 
-  streak.event_converter: '@streak.composite.event_converter'
+  streak.object_converter: '@streak.composite.object_converter'
 
   streak.event_store.unit_of_work:
     class: Streak\Infrastructure\UnitOfWork\EventStoreUnitOfWork
@@ -141,7 +141,7 @@ services:
     class: Streak\Infrastructure\EventStore\DbalPostgresEventStore
     arguments:
       - '@streak.dbal.postgres.event_store.connection'
-      - '@streak.event_converter'
+      - '@streak.object_converter'
 
   streak.event_store:
     alias: 'streak.dbal.postgres.event_store'
@@ -236,7 +236,7 @@ services:
       - { name: 'console.command' }
 
   Streak\Domain\Clock: '@streak.clock'
-  Streak\Domain\Event\Converter: '@streak.event_converter'
+  Streak\Domain\Event\Converter: '@streak.object_converter'
   Streak\Infrastructure\UnitOfWork: '@streak.unit_of_work'
   Streak\Domain\Event\Subscription\Factory: '@streak.subscription_factory'
   Streak\Domain\Event\Listener\Factory: '@streak.listener_factory'
