@@ -34,42 +34,76 @@ services:
 
   streak.object_converter: '@streak.composite.object_converter'
 
+  streak.dbal.postgres.subscription_dao:
+    class: Streak\Infrastructure\Event\Subscription\DAO\DbalPostgresDAO
+    arguments:
+      - '@streak.subscription_factory'
+      - '@streak.listener_factory'
+      - '@streak.dbal.postgres.event_store.connection'
+      - '@streak.object_converter'
+
+  streak.in_memory.subscription_dao:
+    class: Streak\Infrastructure\Event\Subscription\DAO\InMemoryDAO
+    arguments:
+
+  streak.subscription_dao: '@streak.dbal.postgres.subscription_dao'
+
   streak.event_store.unit_of_work:
     class: Streak\Infrastructure\UnitOfWork\EventStoreUnitOfWork
     arguments:
       - '@streak.event_store'
 
-  streak.unit_of_work: '@streak.event_store.unit_of_work'
+  streak.subscription_dao.unit_of_work:
+    class: Streak\Infrastructure\UnitOfWork\SubscriptionDAOUnitOfWork
+    arguments:
+      - '@streak.subscription_dao'
 
   streak.snapshotting.unit_of_work:
     class: Streak\Infrastructure\UnitOfWork\SnapshottingUnitOfWork
-    decorates: streak.unit_of_work
+    decorates: streak.event_store.unit_of_work
     arguments:
       - '@streak.snapshotting.unit_of_work.inner'
       - '@streak.snapshotter'
       - '%streak.snapshotting.interval%'
+
+  streak.composite.unit_of_work:
+    class: Streak\Infrastructure\UnitOfWork\CompositeUnitOfWork
+    arguments:
+      - '@streak.event_store.unit_of_work'
+      - '@streak.subscription_dao.unit_of_work'
+    public: true
+
+  streak.lazy_loaded.unit_of_work:
+    class: Streak\StreakBundle\LazyLoaders\LazyLoadedUnitOfWork
+    arguments:
+      - '@service_container'
+
+  streak.unit_of_work: '@streak.lazy_loaded.unit_of_work'
 
   streak.event_sourced.subscription_factory:
     class: Streak\Infrastructure\Event\Sourced\Subscription\Factory
     arguments:
       - '@streak.clock'
 
-  streak.event_sourced.committing.subscription_factory:
-    class: Streak\Infrastructure\Event\Sourced\CommittingSubscription\Factory
-    decorates: streak.event_sourced.subscription_factory
+  streak.subscription_dao.subscription_factory:
+    class: Streak\Infrastructure\Event\Subscription\DAO\Subscription\Factory
+
+  streak.subscription_factory: '@streak.subscription_dao.subscription_factory'
+
+  streak.committing.subscription_factory:
+    class: Streak\Infrastructure\Event\Subscription\CommittingSubscription\Factory
+    decorates: streak.subscription_factory
     arguments:
-      - '@streak.event_sourced.committing.subscription_factory.inner'
+      - '@streak.committing.subscription_factory.inner'
       - '@streak.unit_of_work'
 
   streak.dbal.transactional.subscription_factory:
     class: Streak\Infrastructure\Event\Subscription\DbalTransactionalSubscription\Factory
-    decorates: streak.event_sourced.subscription_factory
+    decorates: streak.subscription_factory
     arguments:
       - '@streak.dbal.transactional.subscription_factory.inner'
       - '@streak.dbal.postgres.event_store.connection'
       - 1
-
-  streak.subscription_factory: '@streak.event_sourced.subscription_factory'
 
   streak.composite.listener_factory:
     class: Streak\Infrastructure\Event\Listener\CompositeFactory
@@ -84,7 +118,13 @@ services:
       - '@streak.event_store'
       - '@streak.unit_of_work'
 
-  streak.subscription_repository: '@streak.event_sourced.subscription_repository'
+  streak.subscription_dao.subscription_repository:
+    class: Streak\Infrastructure\Event\Subscription\DAO\DAORepository
+    arguments:
+      - '@streak.subscription_dao'
+      - '@streak.unit_of_work'
+
+  streak.subscription_repository: '@streak.subscription_dao.subscription_repository'
 
   streak.null.event_bus:
     class: Streak\Infrastructure\EventBus\NullEventBus
@@ -239,6 +279,7 @@ services:
 
   Streak\Domain\Clock: '@streak.clock'
   Streak\Domain\Event\Converter: '@streak.object_converter'
+  Streak\Infrastructure\Event\Subscription\DAO: '@streak.subscription_dao'
   Streak\Infrastructure\UnitOfWork: '@streak.unit_of_work'
   Streak\Domain\Event\Subscription\Factory: '@streak.subscription_factory'
   Streak\Domain\Event\Listener\Factory: '@streak.listener_factory'
