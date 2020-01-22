@@ -48,6 +48,12 @@ services:
 
   streak.subscription_dao: '@streak.dbal.postgres.subscription_dao'
 
+  streak.identity_mapping.subscription_dao:
+    class: \Streak\Infrastructure\Event\Subscription\DAO\IdentityMappingDao
+    decorates: streak.subscription_dao
+    arguments:
+      - '@streak.identity_mapping.subscription_dao.inner'
+
   streak.event_store.unit_of_work:
     class: Streak\Infrastructure\UnitOfWork\EventStoreUnitOfWork
     arguments:
