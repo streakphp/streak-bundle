@@ -19,18 +19,18 @@ use Streak\Domain\Event;
 use Streak\Domain\Event\Subscription\Repository;
 use Streak\Domain\EventStore;
 use Streak\Domain\Id\UUID;
-use Streak\StreakBundle\Command\RestartSubscriptionCommand;
-use Streak\StreakBundle\Tests\Command\RestartSubscriptionCommandTest\SubscriptionId1;
+use Streak\StreakBundle\Command\PauseSubscriptionCommand;
+use Streak\StreakBundle\Tests\Command\PauseSubscriptionCommandTest\SubscriptionId1;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @author Alan Gabriel Bem <alan.bem@gmail.com>
  *
- * @covers \Streak\StreakBundle\Command\RestartSubscriptionCommand
+ * @covers \Streak\StreakBundle\Command\PauseSubscriptionCommand
  * @covers \Streak\StreakBundle\Command\SubscriptionCommand
  */
-class RestartSubscriptionCommandTest extends TestCase
+class PauseSubscriptionCommandTest extends TestCase
 {
     public const TERMINAL_CLEAR_LINE = "\r\e[2K";
 
@@ -84,7 +84,7 @@ class RestartSubscriptionCommandTest extends TestCase
         $this->repository = $this->getMockBuilder(Repository::class)->getMockForAbstractClass();
         $this->store = $this->getMockBuilder(EventStore::class)->getMockForAbstractClass();
 
-        $this->subscription1 = $this->getMockBuilder([Event\Subscription::class, Event\Producer::class])->setMockClassName('RestartSubscriptionCommandTest_Subscription_Mock')->getMock();
+        $this->subscription1 = $this->getMockBuilder([Event\Subscription::class, Event\Producer::class])->setMockClassName('PauseSubscriptionCommandTest_Subscription_Mock')->getMock();
 
         $this->event1 = $this->getMockBuilder(Event::class)->setMockClassName('event1')->getMockForAbstractClass();
         $this->event2 = $this->getMockBuilder(Event::class)->setMockClassName('event2')->getMockForAbstractClass();
@@ -92,7 +92,7 @@ class RestartSubscriptionCommandTest extends TestCase
         $this->event4 = $this->getMockBuilder(Event::class)->setMockClassName('event4')->getMockForAbstractClass();
         $this->event5 = $this->getMockBuilder(Event::class)->setMockClassName('event5')->getMockForAbstractClass();
 
-        $this->output = new RestartSubscriptionCommandTest\TestOutput();
+        $this->output = new PauseSubscriptionCommandTest\TestOutput();
     }
 
     public function testCommand()
@@ -106,13 +106,13 @@ class RestartSubscriptionCommandTest extends TestCase
 
         $this->subscription1
             ->expects($this->once())
-            ->method('restart')
+            ->method('pause')
         ;
 
-        $command = new RestartSubscriptionCommand($this->repository);
+        $command = new PauseSubscriptionCommand($this->repository);
         $command->run(new ArrayInput(['subscription-type' => SubscriptionId1::class, 'subscription-id' => 'EC2BE294-C07A-4198-A159-4551686F14F9']), $this->output);
 
-        $expected = "Subscription Streak\StreakBundle\Tests\Command\RestartSubscriptionCommandTest\SubscriptionId1(ec2be294-c07a-4198-a159-4551686f14f9) restart succeeded.\n";
+        $expected = "Subscription Streak\StreakBundle\Tests\Command\PauseSubscriptionCommandTest\SubscriptionId1(ec2be294-c07a-4198-a159-4551686f14f9) pausing succeeded.\n";
         $this->assertEquals($expected, $this->output->output);
     }
 
@@ -120,7 +120,7 @@ class RestartSubscriptionCommandTest extends TestCase
     {
         $this->expectExceptionObject(new \InvalidArgumentException('Given "subscription-type" argument "foo-bar" is not a type of "Streak\Domain\Event\Listener\Id"'));
 
-        $command = new RestartSubscriptionCommand($this->repository);
+        $command = new PauseSubscriptionCommand($this->repository);
         $command->run(new ArrayInput(['subscription-type' => 'foo-bar', 'subscription-id' => 'EC2BE294-C07A-4198-A159-4551686F14F9']), $this->output);
     }
 
@@ -128,7 +128,7 @@ class RestartSubscriptionCommandTest extends TestCase
     {
         $this->expectExceptionObject(new \InvalidArgumentException('Given "subscription-type" argument "Streak\Domain\Id\UUID" is not a type of "Streak\Domain\Event\Listener\Id"'));
 
-        $command = new RestartSubscriptionCommand($this->repository);
+        $command = new PauseSubscriptionCommand($this->repository);
         $command->run(new ArrayInput(['subscription-type' => UUID::class, 'subscription-id' => 'EC2BE294-C07A-4198-A159-4551686F14F9']), $this->output);
     }
 
@@ -136,8 +136,8 @@ class RestartSubscriptionCommandTest extends TestCase
     {
         $this->expectExceptionObject(new \InvalidArgumentException('Given "subscription-id" argument "not-an-uuid" is invalid'));
 
-        $command = new RestartSubscriptionCommand($this->repository);
-        $command->run(new ArrayInput(['subscription-type' => 'Streak\\StreakBundle\\Tests\\Command\\RestartSubscriptionCommandTest\\SubscriptionId1', 'subscription-id' => 'not-an-uuid']), $this->output);
+        $command = new PauseSubscriptionCommand($this->repository);
+        $command->run(new ArrayInput(['subscription-type' => 'Streak\\StreakBundle\\Tests\\Command\\PauseSubscriptionCommandTest\\SubscriptionId1', 'subscription-id' => 'not-an-uuid']), $this->output);
     }
 
     public function testNotFound()
@@ -149,36 +149,12 @@ class RestartSubscriptionCommandTest extends TestCase
             ->willReturn(null)
         ;
 
-        $command = new RestartSubscriptionCommand($this->repository);
+        $command = new PauseSubscriptionCommand($this->repository);
         $command->run(new ArrayInput(['subscription-type' => SubscriptionId1::class, 'subscription-id' => 'EC2BE294-C07A-4198-A159-4551686F14F9']), $this->output);
 
         $expected =
-            "Subscription Streak\StreakBundle\Tests\Command\RestartSubscriptionCommandTest\SubscriptionId1(ec2be294-c07a-4198-a159-4551686f14f9) not found.\n"
+            "Subscription Streak\StreakBundle\Tests\Command\PauseSubscriptionCommandTest\SubscriptionId1(ec2be294-c07a-4198-a159-4551686f14f9) not found.\n"
         ;
-        $this->assertEquals($expected, $this->output->output);
-    }
-
-    public function testRestartNotPossible()
-    {
-        $exception = new Event\Subscription\Exception\SubscriptionRestartNotPossible($this->subscription1);
-
-        $this->repository
-            ->expects($this->once())
-            ->method('find')
-            ->with(SubscriptionId1::fromString('EC2BE294-C07A-4198-A159-4551686F14F9'))
-            ->willReturn($this->subscription1)
-        ;
-
-        $this->subscription1
-            ->expects($this->once())
-            ->method('restart')
-            ->willThrowException($exception)
-        ;
-
-        $command = new RestartSubscriptionCommand($this->repository);
-        $command->run(new ArrayInput(['subscription-type' => SubscriptionId1::class, 'subscription-id' => 'EC2BE294-C07A-4198-A159-4551686F14F9']), $this->output);
-
-        $expected = "Subscription Streak\StreakBundle\Tests\Command\RestartSubscriptionCommandTest\SubscriptionId1(ec2be294-c07a-4198-a159-4551686f14f9) restart not supported.\n";
         $this->assertEquals($expected, $this->output->output);
     }
 
@@ -195,17 +171,17 @@ class RestartSubscriptionCommandTest extends TestCase
 
         $this->subscription1
             ->expects($this->once())
-            ->method('restart')
+            ->method('pause')
             ->willThrowException($exception)
         ;
 
         $this->expectExceptionObject($exception);
 
         try {
-            $command = new RestartSubscriptionCommand($this->repository);
+            $command = new PauseSubscriptionCommand($this->repository);
             $command->run(new ArrayInput(['subscription-type' => SubscriptionId1::class, 'subscription-id' => 'EC2BE294-C07A-4198-A159-4551686F14F9']), $this->output);
         } catch (\Throwable $exception) {
-            $expected = "Subscription Streak\StreakBundle\Tests\Command\RestartSubscriptionCommandTest\SubscriptionId1(ec2be294-c07a-4198-a159-4551686f14f9) restart failed.\n";
+            $expected = "Subscription Streak\StreakBundle\Tests\Command\PauseSubscriptionCommandTest\SubscriptionId1(ec2be294-c07a-4198-a159-4551686f14f9) pausing failed.\n";
             $this->assertEquals($expected, $this->output->output);
 
             throw $exception;
@@ -213,7 +189,7 @@ class RestartSubscriptionCommandTest extends TestCase
     }
 }
 
-namespace Streak\StreakBundle\Tests\Command\RestartSubscriptionCommandTest;
+namespace Streak\StreakBundle\Tests\Command\PauseSubscriptionCommandTest;
 
 use Streak\Domain\Event\Listener;
 use Streak\Domain\Id\UUID;

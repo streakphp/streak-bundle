@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Streak\StreakBundle\Command;
 
-use Streak\Domain\Event\Subscription\Exception\SubscriptionRestartNotPossible;
 use Streak\Domain\Event\Subscription\Repository;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,7 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @author Alan Gabriel Bem <alan.bem@gmail.com>
  */
-class RestartSubscriptionCommand extends SubscriptionCommand
+class PauseSubscriptionCommand extends SubscriptionCommand
 {
     private $subscriptions;
 
@@ -36,8 +35,8 @@ class RestartSubscriptionCommand extends SubscriptionCommand
 
     protected function configure()
     {
-        $this->setName('streak:subscription:restart');
-        $this->setDescription('Restart single subscription');
+        $this->setName('streak:subscription:pause');
+        $this->setDescription('Pause single subscription');
         $this->setDefinition([
             new InputArgument('subscription-type', InputArgument::REQUIRED, 'Specify subscription type'),
             new InputArgument('subscription-id', InputArgument::REQUIRED, 'Specify subscription id'),
@@ -56,17 +55,15 @@ class RestartSubscriptionCommand extends SubscriptionCommand
         }
 
         try {
-            $subscription->restart();
+            $subscription->pause();
 
-            $output->writeln(sprintf('Subscription %s restart succeeded.', $this->formatSubscriptionId($id)));
-        } catch (SubscriptionRestartNotPossible $exception) {
-            $output->writeln(sprintf('Subscription %s restart not supported.', $this->formatSubscriptionId($id)));
+            $output->writeln(sprintf('Subscription %s pausing succeeded.', $this->formatSubscriptionId($id)));
         } catch (\Throwable $exception) {
             // lets write to stderr if possible
             if ($output instanceof ConsoleOutputInterface) {
                 $output = $output->getErrorOutput(); // @codeCoverageIgnore
             }
-            $output->writeln(sprintf('Subscription %s restart failed.', $this->formatSubscriptionId($id)));
+            $output->writeln(sprintf('Subscription %s pausing failed.', $this->formatSubscriptionId($id)));
 
             throw $exception;
         }

@@ -13,10 +13,8 @@ declare(strict_types=1);
 
 namespace Streak\StreakBundle\Command;
 
-use Streak\Domain\Event\Listener;
 use Streak\Domain\Event\Subscription\Repository;
 use Streak\Domain\EventStore;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -27,7 +25,7 @@ use Symfony\Component\Console\Output\StreamOutput;
 /**
  * @author Alan Gabriel Bem <alan.bem@gmail.com>
  */
-class RunSubscriptionCommand extends Command
+class RunSubscriptionCommand extends SubscriptionCommand
 {
     private $subscriptions;
     private $store;
@@ -47,6 +45,7 @@ class RunSubscriptionCommand extends Command
         $this->setDefinition([
             new InputArgument('subscription-type', InputArgument::REQUIRED, 'Specify subscription type'),
             new InputArgument('subscription-id', InputArgument::REQUIRED, 'Specify subscription id'),
+            new InputOption('pause-on-error', '', InputOption::VALUE_NONE, 'Pause subscription on error'),
             new InputOption('listening-limit', 'l', InputOption::VALUE_OPTIONAL, 'Maximum number of events subscription can listen to', null),
         ]);
     }
@@ -68,7 +67,7 @@ class RunSubscriptionCommand extends Command
         $progress->setMessage($input->getArgument('subscription-type'), 'subscription_type');
         $progress->setMessage($input->getArgument('subscription-id'), 'subscription_id');
 
-        $subscription = $this->subscriptions->find($this->id($input));
+        $subscription = $this->subscriptions->find($this->subscriptionId($input));
 
         if (null === $subscription) {
             $output->write(sprintf('Subscription <fg=blue>%s</>(<fg=cyan>%s</>) not found.', $input->getArgument('subscription-type'), $input->getArgument('subscription-id')));
@@ -88,31 +87,14 @@ class RunSubscriptionCommand extends Command
             foreach ($subscription->subscribeTo($this->store, $limit) as $event) {
                 $progress->advance();
             }
+        } catch (\Throwable $exception) {
+            if (true === $input->getOption('pause-on-error')) {
+                $subscription->pause();
+            }
+
+            throw $exception;
         } finally {
             $progress->finish();
-        }
-    }
-
-    private function id(InputInterface $input) : Listener\Id
-    {
-        $class = $input->getArgument('subscription-type');
-
-        try {
-            $reflection = new \ReflectionClass($class);
-        } catch (\ReflectionException $exception) {
-            throw new \InvalidArgumentException(sprintf('Given "subscription-type" argument "%s" is not a type of "%s"', $class, Listener\Id::class));
-        }
-
-        if (false === $reflection->implementsInterface(Listener\Id::class)) {
-            throw new \InvalidArgumentException(sprintf('Given "subscription-type" argument "%s" is not a type of "%s"', $class, Listener\Id::class));
-        }
-
-        $id = (string) $input->getArgument('subscription-id');
-
-        try {
-            return $reflection->getMethod('fromString')->invoke(null, $id);
-        } catch (\Throwable $exception) {
-            throw new \InvalidArgumentException(sprintf('Given "subscription-id" argument "%s" is invalid', $id));
         }
     }
 }
