@@ -190,7 +190,7 @@ class RunSubscriptionCommandTest extends TestCase
         $this->assertEquals($expected, $this->output->output);
     }
 
-    public function testError()
+    public function testErrorWithoutPausing()
     {
         $this->repository
             ->expects($this->once())
@@ -210,11 +210,56 @@ class RunSubscriptionCommandTest extends TestCase
             })
         ;
 
+        $this->subscription1
+            ->expects($this->never())
+            ->method('pause')
+        ;
+
         $this->expectExceptionObject(new \RuntimeException('Test exception thrown'));
 
         try {
             $command = new RunSubscriptionCommand($this->repository, $this->store);
             $command->run(new ArrayInput(['subscription-type' => 'Streak\\StreakBundle\\Tests\\Command\\RunSubscriptionCommandTest\\SubscriptionId1', 'subscription-id' => 'EC2BE294-C07A-4198-A159-4551686F14F9']), $this->output);
+        } finally {
+            $expected =
+                "Subscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    0 events in < 1 sec.".
+                self::TERMINAL_CLEAR_LINE.
+                "Subscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    2 events in < 1 sec."
+            ;
+            $this->assertEquals($expected, $this->output->output);
+        }
+    }
+
+    public function testErrorWithPausing()
+    {
+        $this->repository
+            ->expects($this->once())
+            ->method('find')
+            ->with(SubscriptionId1::fromString('EC2BE294-C07A-4198-A159-4551686F14F9'))
+            ->willReturn($this->subscription1)
+        ;
+
+        $this->subscription1
+            ->expects($this->once())
+            ->method('subscribeTo')
+            ->with($this->store)
+            ->willReturnCallback(function () {
+                yield $this->event1;
+                yield $this->event2;
+                throw new \RuntimeException('Test exception thrown');
+            })
+        ;
+
+        $this->subscription1
+            ->expects($this->once())
+            ->method('pause')
+        ;
+
+        $this->expectExceptionObject(new \RuntimeException('Test exception thrown'));
+
+        try {
+            $command = new RunSubscriptionCommand($this->repository, $this->store);
+            $command->run(new ArrayInput(['--pause-on-error' => true, 'subscription-type' => 'Streak\\StreakBundle\\Tests\\Command\\RunSubscriptionCommandTest\\SubscriptionId1', 'subscription-id' => 'EC2BE294-C07A-4198-A159-4551686F14F9']), $this->output);
         } finally {
             $expected =
                 "Subscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    0 events in < 1 sec.".
