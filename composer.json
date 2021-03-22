@@ -19,7 +19,7 @@
   },
   "require": {
     "php": ">=7.4",
-    "doctrine/dbal": "^2.8",
+    "doctrine/dbal": "^3.0",
     "streak/streak": "^1.0@dev",
     "symfony/form": "^5.2",
     "symfony/config": "^5.2",
