@@ -21,6 +21,7 @@ use Streak\Domain\EventStore;
 use Streak\Domain\Id\UUID;
 use Streak\StreakBundle\Command\RunSubscriptionCommand;
 use Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1;
+use Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionWhichIsAlsoProducer;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -31,7 +32,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class RunSubscriptionCommandTest extends TestCase
 {
-    public const TERMINAL_CLEAR_LINE = "\r\e[2K";
+    public const TERMINAL_CLEAR_LINE = "\e[1G[2K";
 
     /**
      * @var Repository|MockObject
@@ -78,12 +79,12 @@ class RunSubscriptionCommandTest extends TestCase
      */
     private $output;
 
-    public function setUp()
+    protected function setUp() : void
     {
         $this->repository = $this->getMockBuilder(Repository::class)->getMockForAbstractClass();
         $this->store = $this->getMockBuilder(EventStore::class)->getMockForAbstractClass();
 
-        $this->subscription1 = $this->getMockBuilder([Event\Subscription::class, Event\Producer::class])->getMock();
+        $this->subscription1 = $this->getMockBuilder(SubscriptionWhichIsAlsoProducer::class)->getMock();
 
         $this->event1 = $this->getMockBuilder(Event::class)->setMockClassName('event1')->getMockForAbstractClass();
         $this->event2 = $this->getMockBuilder(Event::class)->setMockClassName('event2')->getMockForAbstractClass();
@@ -273,6 +274,7 @@ class RunSubscriptionCommandTest extends TestCase
 
 namespace Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest;
 
+use Streak\Domain\Event;
 use Streak\Domain\Event\Listener;
 use Streak\Domain\Id\UUID;
 use Symfony\Component\Console\Output\Output;
@@ -285,7 +287,7 @@ class TestOutput extends Output
 {
     public const TERMINAL_CLEAR_LINE = "\r\e[2K";
 
-    public $output = '';
+    public string $output = '';
 
     public function section() : self
     {
@@ -304,4 +306,8 @@ class TestOutput extends Output
             $this->output .= PHP_EOL;
         }
     }
+}
+
+abstract class SubscriptionWhichIsAlsoProducer implements Event\Subscription, Event\Producer
+{
 }

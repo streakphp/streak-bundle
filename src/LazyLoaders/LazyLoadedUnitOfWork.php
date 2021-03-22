@@ -18,10 +18,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * @author Alan Gabriel Bem <alan.bem@gmail.com>
+ *
+ * @see \Streak\StreakBundle\Tests\LazyLoaders\LazyLoadedUnitOfWorkTest
  */
 class LazyLoadedUnitOfWork implements UnitOfWork
 {
-    private $container;
+    private ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)
     {

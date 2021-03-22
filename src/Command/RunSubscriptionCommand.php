@@ -24,11 +24,13 @@ use Symfony\Component\Console\Output\StreamOutput;
 
 /**
  * @author Alan Gabriel Bem <alan.bem@gmail.com>
+ *
+ * @see \Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest
  */
 class RunSubscriptionCommand extends SubscriptionCommand
 {
-    private $subscriptions;
-    private $store;
+    private Repository $subscriptions;
+    private EventStore $store;
 
     public function __construct(Repository $subscriptions, EventStore $store)
     {
@@ -72,7 +74,7 @@ class RunSubscriptionCommand extends SubscriptionCommand
         if (null === $subscription) {
             $output->write(sprintf('Subscription <fg=blue>%s</>(<fg=cyan>%s</>) not found.', $input->getArgument('subscription-type'), $input->getArgument('subscription-id')));
 
-            return;
+            return 0;
         }
 
         $limit = $input->getOption('listening-limit');
@@ -96,5 +98,7 @@ class RunSubscriptionCommand extends SubscriptionCommand
         } finally {
             $progress->finish();
         }
+
+        return 0;
     }
 }

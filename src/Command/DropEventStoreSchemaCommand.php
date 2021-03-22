@@ -21,10 +21,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @author Alan Gabriel Bem <alan.bem@gmail.com>
+ *
+ * @see \Streak\StreakBundle\Tests\Command\DropEventStoreSchemaCommandTest
  */
 class DropEventStoreSchemaCommand extends Command
 {
-    private $store;
+    private EventStore $store;
 
     public function __construct(EventStore $store)
     {
@@ -44,7 +46,7 @@ class DropEventStoreSchemaCommand extends Command
         if (!$this->store instanceof Schemable) {
             $output->writeln('<comment>Can\'t drop underlying event store\'s schema as functionality is unsupported.</comment>');
 
-            return;
+            return 0;
         }
 
         $schema = $this->store->schema();
@@ -52,7 +54,7 @@ class DropEventStoreSchemaCommand extends Command
         if (null === $schema) {
             $output->writeln('<comment>Can\'t drop underlying event store\'s schema as functionality is unsupported.</comment>');
 
-            return;
+            return 0;
         }
 
         try {
@@ -66,5 +68,7 @@ class DropEventStoreSchemaCommand extends Command
 
             return 1; // error
         }
+
+        return 0;
     }
 }

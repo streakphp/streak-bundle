@@ -19,6 +19,7 @@ use Streak\Domain\EventStore;
 use Streak\Infrastructure\EventStore\Schema;
 use Streak\Infrastructure\EventStore\Schemable;
 use Streak\StreakBundle\Command\CreateEventStoreSchemaCommand;
+use Streak\StreakBundle\Tests\Command\CreateEventStoreSchemaCommandTest\EventStoreWithSchema;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -32,26 +33,26 @@ class CreateEventStoreSchemaCommandTest extends TestCase
     /**
      * @var EventStore|Schemable|MockObject
      */
-    private $schemableStore;
+    private ?EventStore $schemableStore = null;
 
     /**
      * @var EventStore|MockObject
      */
-    private $schemalessStore;
+    private ?EventStore $schemalessStore = null;
 
     /**
      * @var Schema|MockObject
      */
-    private $schema;
+    private ?Schema $schema = null;
 
     /**
      * @var OutputInterface|MockObject
      */
     private $output;
 
-    protected function setUp()
+    protected function setUp() : void
     {
-        $this->schemableStore = $this->getMockBuilder([EventStore::class, Schemable::class])->getMock();
+        $this->schemableStore = $this->getMockBuilder(EventStoreWithSchema::class)->getMock();
         $this->schemalessStore = $this->getMockBuilder(EventStore::class)->getMockForAbstractClass();
         $this->schema = $this->getMockBuilder(Schema::class)->getMockForAbstractClass();
         $this->output = $this->getMockBuilder(OutputInterface::class)->getMockForAbstractClass();
@@ -190,4 +191,13 @@ class CreateEventStoreSchemaCommandTest extends TestCase
 
         $this->assertNotSame(0, $exit);
     }
+}
+
+namespace Streak\StreakBundle\Tests\Command\CreateEventStoreSchemaCommandTest;
+
+use Streak\Domain\EventStore;
+use Streak\Infrastructure\EventStore\Schemable;
+
+abstract class EventStoreWithSchema implements EventStore, Schemable
+{
 }

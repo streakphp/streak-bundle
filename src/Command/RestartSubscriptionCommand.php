@@ -22,10 +22,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @author Alan Gabriel Bem <alan.bem@gmail.com>
+ *
+ * @see \Streak\StreakBundle\Tests\Command\RestartSubscriptionCommandTest
  */
 class RestartSubscriptionCommand extends SubscriptionCommand
 {
-    private $subscriptions;
+    private Repository $subscriptions;
 
     public function __construct(Repository $subscriptions)
     {
@@ -52,7 +54,7 @@ class RestartSubscriptionCommand extends SubscriptionCommand
         if (null === $subscription) {
             $output->writeln(sprintf('Subscription %s not found.', $this->formatSubscriptionId($id)));
 
-            return;
+            return 0;
         }
 
         try {
@@ -70,5 +72,7 @@ class RestartSubscriptionCommand extends SubscriptionCommand
 
             throw $exception;
         }
+
+        return 0;
     }
 }

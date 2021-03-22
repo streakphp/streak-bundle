@@ -21,10 +21,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @author Alan Gabriel Bem <alan.bem@gmail.com>
+ *
+ * @see \Streak\StreakBundle\Tests\Command\ResetSnapshotsCommandTest
  */
 class ResetSnapshotsCommand extends Command
 {
-    private $storage;
+    private Snapshotter\Storage $storage;
 
     public function __construct(Snapshotter\Storage $storage)
     {
@@ -44,7 +46,7 @@ class ResetSnapshotsCommand extends Command
         if (!$this->storage instanceof Resettable) {
             $output->writeln('<comment>Reset functionality is not supported by current snapshots storage.</comment>');
 
-            return;
+            return 0;
         }
 
         $result = $this->storage->reset();
@@ -52,9 +54,11 @@ class ResetSnapshotsCommand extends Command
         if (true === $result) {
             $output->writeln('<info>Snapshots storage reset succeeded.</info>');
 
-            return;
+            return 0;
         }
 
         $output->writeln('<error>Snapshots storage reset failed.</error>');
+
+        return 1;
     }
 }
