@@ -20,6 +20,8 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 /**
  * @author Alan Gabriel Bem <alan.bem@gmail.com>
+ *
+ * @see \Streak\StreakBundle\Tests\DependencyInjection\StreakExtensionTest
  */
 class StreakExtension extends Extension
 {

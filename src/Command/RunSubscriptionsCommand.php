@@ -33,17 +33,17 @@ class RunSubscriptionsCommand extends Command
 {
     public const TERMINAL_CLEAR_LINE = "\r\e[2K";
 
-    private $subscriptions;
+    private Repository $subscriptions;
 
     /**
      * @var Process[]
      */
-    private $processes = [];
+    private array $processes = [];
 
     /**
      * @var ConsoleSectionOutput[]
      */
-    private $outputs = [];
+    private array $outputs = [];
 
     public function __construct(Repository $subscriptions)
     {

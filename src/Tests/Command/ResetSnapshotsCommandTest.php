@@ -18,6 +18,7 @@ use PHPUnit\Framework\TestCase;
 use Streak\Infrastructure\AggregateRoot\Snapshotter;
 use Streak\Infrastructure\Resettable;
 use Streak\StreakBundle\Command\ResetSnapshotsCommand;
+use Streak\StreakBundle\Tests\Command\ResetSnapshotsCommandTest\ResettableStorage;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -43,9 +44,9 @@ class ResetSnapshotsCommandTest extends TestCase
      */
     private $output;
 
-    protected function setUp()
+    protected function setUp() : void
     {
-        $this->resettablStorage = $this->getMockBuilder([Snapshotter\Storage::class, Resettable::class])->getMock();
+        $this->resettablStorage = $this->getMockBuilder(ResettableStorage::class)->getMock();
         $this->nonResettableStorage = $this->getMockBuilder(Snapshotter\Storage::class)->getMockForAbstractClass();
         $this->output = $this->getMockBuilder(OutputInterface::class)->getMockForAbstractClass();
     }
@@ -132,4 +133,13 @@ class ResetSnapshotsCommandTest extends TestCase
 
         $command->run(new StringInput(''), $this->output);
     }
+}
+
+namespace Streak\StreakBundle\Tests\Command\ResetSnapshotsCommandTest;
+
+use Streak\Infrastructure\AggregateRoot\Snapshotter\Storage;
+use Streak\Infrastructure\Resettable;
+
+abstract class ResettableStorage implements Storage, Resettable
+{
 }

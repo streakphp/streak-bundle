@@ -36,7 +36,7 @@ class LazyLoadedUnitOfWorkTest extends TestCase
      */
     private $uow;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->container = $this->getMockBuilder(ContainerInterface::class)->getMockForAbstractClass();
         $this->uow = $this->getMockBuilder(UnitOfWork::class)->getMockForAbstractClass();

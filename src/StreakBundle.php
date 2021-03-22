@@ -28,6 +28,8 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
  * @author Alan Gabriel Bem <alan.bem@gmail.com>
+ *
+ * @see \Streak\StreakBundle\Tests\StreakBundleTest
  */
 class StreakBundle extends Bundle
 {

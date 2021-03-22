@@ -19,6 +19,8 @@ use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * @author Alan Gabriel Bem <alan.bem@gmail.com>
+ *
+ * @see \Streak\StreakBundle\Tests\DependencyInjection\Compiler\RegisterCommandHandlersCompilerPassTest
  */
 class RegisterCommandHandlersCompilerPass implements CompilerPassInterface
 {
