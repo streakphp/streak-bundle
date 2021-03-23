@@ -49,7 +49,7 @@ services:
   streak.subscription_dao: '@streak.dbal.postgres.subscription_dao'
 
   streak.identity_mapping.subscription_dao:
-    class: \Streak\Infrastructure\Event\Subscription\DAO\IdentityMappingDao
+    class: Streak\Infrastructure\Event\Subscription\DAO\IdentityMappingDao
     decorates: streak.subscription_dao
     arguments:
       - '@streak.identity_mapping.subscription_dao.inner'
@@ -93,6 +93,8 @@ services:
 
   streak.subscription_dao.subscription_factory:
     class: Streak\Infrastructure\Event\Subscription\DAO\Subscription\Factory
+    arguments:
+      - '@streak.clock'
 
   streak.subscription_factory: '@streak.subscription_dao.subscription_factory'
 
@@ -190,6 +192,9 @@ services:
     arguments:
       - '@streak.dbal.postgres.event_store.connection'
       - '@streak.object_converter'
+
+  streak.in_memory.event_store:
+    class: Streak\Infrastructure\EventStore\InMemoryEventStore
 
   streak.event_store:
     alias: 'streak.dbal.postgres.event_store'
