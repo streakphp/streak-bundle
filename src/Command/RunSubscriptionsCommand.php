@@ -110,6 +110,8 @@ class RunSubscriptionsCommand extends Command
         }
 
         $this->output();
+
+        return 0;
     }
 
     private function runningProcesses() : int
