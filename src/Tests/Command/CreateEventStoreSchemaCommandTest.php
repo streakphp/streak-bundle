@@ -13,11 +13,9 @@ declare(strict_types=1);
 
 namespace Streak\StreakBundle\Tests\Command;
 
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Streak\Domain\EventStore;
 use Streak\Infrastructure\EventStore\Schema;
-use Streak\Infrastructure\EventStore\Schemable;
 use Streak\StreakBundle\Command\CreateEventStoreSchemaCommand;
 use Streak\StreakBundle\Tests\Command\CreateEventStoreSchemaCommandTest\EventStoreWithSchema;
 use Symfony\Component\Console\Input\StringInput;
@@ -30,27 +28,15 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class CreateEventStoreSchemaCommandTest extends TestCase
 {
-    /**
-     * @var EventStore|Schemable|MockObject
-     */
-    private ?EventStore $schemableStore = null;
+    private EventStoreWithSchema $schemableStore;
 
-    /**
-     * @var EventStore|MockObject
-     */
-    private ?EventStore $schemalessStore = null;
+    private EventStore $schemalessStore;
 
-    /**
-     * @var Schema|MockObject
-     */
-    private ?Schema $schema = null;
+    private Schema $schema;
 
-    /**
-     * @var OutputInterface|MockObject
-     */
-    private $output;
+    private OutputInterface $output;
 
-    protected function setUp() : void
+    protected function setUp(): void
     {
         $this->schemableStore = $this->getMockBuilder(EventStoreWithSchema::class)->getMock();
         $this->schemalessStore = $this->getMockBuilder(EventStore::class)->getMockForAbstractClass();
@@ -63,24 +49,24 @@ class CreateEventStoreSchemaCommandTest extends TestCase
         $command = new CreateEventStoreSchemaCommand($this->schemalessStore);
 
         $this->schemalessStore
-            ->expects($this->never())
-            ->method($this->anything())
+            ->expects(self::never())
+            ->method(self::anything())
         ;
 
         $this->schema
-            ->expects($this->never())
-            ->method($this->anything())
+            ->expects(self::never())
+            ->method(self::anything())
         ;
 
         $this->output
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('writeln')
             ->with("<comment>Can't create underlying event store's schema as functionality is unsupported.</comment>")
         ;
 
         $exit = $command->run(new StringInput(''), $this->output);
 
-        $this->assertSame(0, $exit);
+        self::assertSame(0, $exit);
     }
 
     public function testNoSchema()
@@ -88,26 +74,26 @@ class CreateEventStoreSchemaCommandTest extends TestCase
         $command = new CreateEventStoreSchemaCommand($this->schemableStore);
 
         $this->schemableStore
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('schema')
             ->with()
             ->willReturn(null)
         ;
 
         $this->schema
-            ->expects($this->never())
-            ->method($this->anything())
+            ->expects(self::never())
+            ->method(self::anything())
         ;
 
         $this->output
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('writeln')
             ->with("<comment>Can't create underlying event store's schema as functionality is unsupported.</comment>")
         ;
 
         $exit = $command->run(new StringInput(''), $this->output);
 
-        $this->assertSame(0, $exit);
+        self::assertSame(0, $exit);
     }
 
     public function testSuccess()
@@ -115,36 +101,36 @@ class CreateEventStoreSchemaCommandTest extends TestCase
         $command = new CreateEventStoreSchemaCommand($this->schemableStore);
 
         $this->schemableStore
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('schema')
             ->with()
             ->willReturn($this->schema)
         ;
 
         $this->schemableStore
-            ->expects($this->never())
-            ->method($this->logicalNot($this->equalTo('schema')))
+            ->expects(self::never())
+            ->method(self::logicalNot(self::equalTo('schema')))
         ;
 
         $this->schema
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('create')
         ;
 
         $this->schema
-            ->expects($this->never())
+            ->expects(self::never())
             ->method('drop')
         ;
 
         $this->output
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('writeln')
             ->with('<info>Creating event store schema succeeded.</info>')
         ;
 
         $exit = $command->run(new StringInput(''), $this->output);
 
-        $this->assertSame(0, $exit);
+        self::assertSame(0, $exit);
     }
 
     public function testError()
@@ -154,31 +140,31 @@ class CreateEventStoreSchemaCommandTest extends TestCase
         $exception = new \RuntimeException('Reason of the failure.');
 
         $this->schemableStore
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('schema')
             ->with()
             ->willReturn($this->schema)
         ;
 
         $this->schemableStore
-            ->expects($this->never())
-            ->method($this->logicalNot($this->equalTo('schema')))
+            ->expects(self::never())
+            ->method(self::logicalNot(self::equalTo('schema')))
         ;
 
         $this->schema
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('create')
             ->with()
             ->willThrowException($exception)
         ;
 
         $this->schema
-            ->expects($this->never())
+            ->expects(self::never())
             ->method('drop')
         ;
 
         $this->output
-            ->expects($this->exactly(3))
+            ->expects(self::exactly(3))
             ->method('writeln')
             ->withConsecutive(
                 ['<error>Creating event store schema failed.</error>'],
@@ -189,7 +175,7 @@ class CreateEventStoreSchemaCommandTest extends TestCase
 
         $exit = $command->run(new StringInput(''), $this->output);
 
-        $this->assertNotSame(0, $exit);
+        self::assertNotSame(0, $exit);
     }
 }
 

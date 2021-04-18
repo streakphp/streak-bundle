@@ -13,10 +13,8 @@ declare(strict_types=1);
 
 namespace Streak\StreakBundle\Tests\Command;
 
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Streak\Infrastructure\AggregateRoot\Snapshotter;
-use Streak\Infrastructure\Resettable;
 use Streak\StreakBundle\Command\ResetSnapshotsCommand;
 use Streak\StreakBundle\Tests\Command\ResetSnapshotsCommandTest\ResettableStorage;
 use Symfony\Component\Console\Input\StringInput;
@@ -29,51 +27,42 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ResetSnapshotsCommandTest extends TestCase
 {
-    /**
-     * @var Snapshotter\Storage|Resettable|MockObject
-     */
-    private $resettablStorage;
+    private ResettableStorage $resettableStorage;
 
-    /**
-     * @var Snapshotter\Storage|MockObject
-     */
-    private $nonResettableStorage;
+    private Snapshotter\Storage $nonResettableStorage;
 
-    /**
-     * @var OutputInterface|MockObject
-     */
-    private $output;
+    private OutputInterface $output;
 
-    protected function setUp() : void
+    protected function setUp(): void
     {
-        $this->resettablStorage = $this->getMockBuilder(ResettableStorage::class)->getMock();
+        $this->resettableStorage = $this->getMockBuilder(ResettableStorage::class)->getMock();
         $this->nonResettableStorage = $this->getMockBuilder(Snapshotter\Storage::class)->getMockForAbstractClass();
         $this->output = $this->getMockBuilder(OutputInterface::class)->getMockForAbstractClass();
     }
 
     public function testSuccessfulReset()
     {
-        $command = new ResetSnapshotsCommand($this->resettablStorage);
+        $command = new ResetSnapshotsCommand($this->resettableStorage);
 
-        $this->resettablStorage
-            ->expects($this->once())
+        $this->resettableStorage
+            ->expects(self::once())
             ->method('reset')
             ->with()
             ->willReturn(true)
         ;
 
-        $this->resettablStorage
-            ->expects($this->never())
+        $this->resettableStorage
+            ->expects(self::never())
             ->method('find')
         ;
 
-        $this->resettablStorage
-            ->expects($this->never())
+        $this->resettableStorage
+            ->expects(self::never())
             ->method('store')
         ;
 
         $this->output
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('writeln')
             ->with('<info>Snapshots storage reset succeeded.</info>')
         ;
@@ -83,27 +72,27 @@ class ResetSnapshotsCommandTest extends TestCase
 
     public function testFailedReset()
     {
-        $command = new ResetSnapshotsCommand($this->resettablStorage);
+        $command = new ResetSnapshotsCommand($this->resettableStorage);
 
-        $this->resettablStorage
-            ->expects($this->once())
+        $this->resettableStorage
+            ->expects(self::once())
             ->method('reset')
             ->with()
             ->willReturn(false)
         ;
 
-        $this->resettablStorage
-            ->expects($this->never())
+        $this->resettableStorage
+            ->expects(self::never())
             ->method('find')
         ;
 
-        $this->resettablStorage
-            ->expects($this->never())
+        $this->resettableStorage
+            ->expects(self::never())
             ->method('store')
         ;
 
         $this->output
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('writeln')
             ->with('<error>Snapshots storage reset failed.</error>')
         ;
@@ -116,17 +105,17 @@ class ResetSnapshotsCommandTest extends TestCase
         $command = new ResetSnapshotsCommand($this->nonResettableStorage);
 
         $this->nonResettableStorage
-            ->expects($this->never())
+            ->expects(self::never())
             ->method('find')
         ;
 
         $this->nonResettableStorage
-            ->expects($this->never())
+            ->expects(self::never())
             ->method('store')
         ;
 
         $this->output
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('writeln')
             ->with('<comment>Reset functionality is not supported by current snapshots storage.</comment>')
         ;

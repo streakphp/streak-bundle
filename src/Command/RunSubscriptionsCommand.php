@@ -70,7 +70,7 @@ class RunSubscriptionsCommand extends Command
         $limit = (int) $input->getOption('concurrency-limit');
         $filter = Repository\Filter::nothing();
 
-        if (count($types) > 0) {
+        if (\count($types) > 0) {
             $filter = $filter->filterSubscriptionTypes(...$types);
         }
 
@@ -114,7 +114,7 @@ class RunSubscriptionsCommand extends Command
         return 0;
     }
 
-    private function runningProcesses() : int
+    private function runningProcesses(): int
     {
         $number = 0;
         foreach ($this->processes as $process) {
@@ -126,9 +126,9 @@ class RunSubscriptionsCommand extends Command
         return $number;
     }
 
-    private function command(Subscription $subscription) : array
+    private function command(Subscription $subscription): array
     {
-        $type = get_class($subscription->subscriptionId());
+        $type = \get_class($subscription->subscriptionId());
         $id = $subscription->subscriptionId()->toString();
 
         $command = ['bin/console', 'streak:subscription:run', $type, $id, '--no-ansi'];
@@ -136,7 +136,7 @@ class RunSubscriptionsCommand extends Command
         return $command;
     }
 
-    private function verbosity(array $command, OutputInterface $output) : array
+    private function verbosity(array $command, OutputInterface $output): array
     {
         if ($output->getVerbosity() === $output::VERBOSITY_QUIET) {
             $command[] = '--quiet';
@@ -154,7 +154,7 @@ class RunSubscriptionsCommand extends Command
         return $command;
     }
 
-    private function listeningLimit(array $command, InputInterface $input) : array
+    private function listeningLimit(array $command, InputInterface $input): array
     {
         $limit = $input->getOption('listening-limit');
 
@@ -165,7 +165,7 @@ class RunSubscriptionsCommand extends Command
         return $command;
     }
 
-    private function executable(array $command, InputInterface $input) : array
+    private function executable(array $command, InputInterface $input): array
     {
         $executable = $input->getOption('php-executable');
 
@@ -174,7 +174,7 @@ class RunSubscriptionsCommand extends Command
         return $command;
     }
 
-    private function decorate(string $string) : string
+    private function decorate(string $string): string
     {
         $pattern = '/Subscription (.+)\((.+)\) processed (.+) events in (.+)./i';
         $replacement = 'Subscription <fg=blue>$1</>(<fg=cyan>$2</>) processed <fg=yellow>$3</> events in <fg=magenta>$4</>.';
@@ -190,7 +190,7 @@ class RunSubscriptionsCommand extends Command
     /**
      * TODO: clean this up.
      */
-    private function output() : void
+    private function output(): void
     {
         foreach ($this->processes as $index => $process) {
             if (false === isset($this->outputs[$index])) {
@@ -255,7 +255,7 @@ class RunSubscriptionsCommand extends Command
         usleep(500000); // wait 500ms between refreshing output
     }
 
-    private function extractAndDecorateCommand(Process $process) : string
+    private function extractAndDecorateCommand(Process $process): string
     {
         $command = $process->getCommandLine();
         $command = explode(' ', $command);

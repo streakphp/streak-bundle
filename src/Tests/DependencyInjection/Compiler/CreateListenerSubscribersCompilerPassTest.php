@@ -46,10 +46,10 @@ class CreateListenerSubscribersCompilerPassTest extends TestCase
 
         $this->process($container);
 
-        $this->assertTrue($this->subscriberDefined('foo', $container));
-        $this->assertTrue($this->subscriberDefined('bar', $container));
-        $this->assertTrue($this->subscriberDefined('moo', $container));
-        $this->assertFalse($this->subscriberDefined('nope', $container));
+        self::assertTrue($this->subscriberDefined('foo', $container));
+        self::assertTrue($this->subscriberDefined('bar', $container));
+        self::assertTrue($this->subscriberDefined('moo', $container));
+        self::assertFalse($this->subscriberDefined('nope', $container));
     }
 
     private function subscriberDefined(string $id, ContainerBuilder $container)
