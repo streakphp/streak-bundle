@@ -30,37 +30,37 @@ class LazyLoadedUnitOfWork implements UnitOfWork
         $this->container = $container;
     }
 
-    public function add($object) : void
+    public function add($object): void
     {
         $this->container->get('streak.composite.unit_of_work')->add($object);
     }
 
-    public function remove($object) : void
+    public function remove($object): void
     {
         $this->container->get('streak.composite.unit_of_work')->remove($object);
     }
 
-    public function has($object) : bool
+    public function has($object): bool
     {
         return $this->container->get('streak.composite.unit_of_work')->has($object);
     }
 
-    public function uncommitted() : array
+    public function uncommitted(): array
     {
         return $this->container->get('streak.composite.unit_of_work')->uncommitted();
     }
 
-    public function count() : int
+    public function count(): int
     {
         return $this->container->get('streak.composite.unit_of_work')->count();
     }
 
-    public function commit() : \Generator
+    public function commit(): \Generator
     {
         yield from $this->container->get('streak.composite.unit_of_work')->commit();
     }
 
-    public function clear() : void
+    public function clear(): void
     {
         $this->container->get('streak.composite.unit_of_work')->clear();
     }

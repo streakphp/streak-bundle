@@ -48,10 +48,10 @@ class RegisterAggregateFactoriesCompilerPassTest extends TestCase
         $composite = $container->register('streak.composite.aggregate_factory');
         $this->process($container);
 
-        $this->assertTrue($this->factoryRegistered($composite, 'foo'));
-        $this->assertTrue($this->factoryRegistered($composite, 'bar'));
-        $this->assertTrue($this->factoryRegistered($composite, 'moo'));
-        $this->assertFalse($this->factoryRegistered($composite, 'nope'));
+        self::assertTrue($this->factoryRegistered($composite, 'foo'));
+        self::assertTrue($this->factoryRegistered($composite, 'bar'));
+        self::assertTrue($this->factoryRegistered($composite, 'moo'));
+        self::assertFalse($this->factoryRegistered($composite, 'nope'));
     }
 
     private function factoryRegistered(Definition $composite, $id)

@@ -36,6 +36,6 @@ class StreakBundleTest extends TestCase
 
         $after = $config->getBeforeOptimizationPasses();
 
-        $this->assertTrue(count($before) < count($after)); // compiler passes registered
+        self::assertLessThan(\count($after), \count($before)); // compiler passes registered
     }
 }

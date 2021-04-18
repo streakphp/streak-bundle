@@ -28,8 +28,8 @@ class StreakExtensionTest extends TestCase
     {
         $extension = new StreakExtension();
 
-        $this->assertSame('streak', $extension->getAlias());
-        $this->assertSame('http://streakphp.com/schema/dic/streak', $extension->getNamespace());
+        self::assertSame('streak', $extension->getAlias());
+        self::assertSame('http://streakphp.com/schema/dic/streak', $extension->getNamespace());
 
         return $extension;
     }
@@ -41,10 +41,10 @@ class StreakExtensionTest extends TestCase
     {
         $container = new ContainerBuilder();
 
-        $this->assertCount(1, $container->getDefinitions()); // container itself is registered
+        self::assertCount(1, $container->getDefinitions()); // container itself is registered
 
         $extension->load([], $container);
 
-        $this->assertNotCount(1, $container->getDefinitions()); // more than before loading extension
+        self::assertNotCount(1, $container->getDefinitions()); // more than before loading extension
     }
 }

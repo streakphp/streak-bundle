@@ -53,13 +53,13 @@ class RegisterCommandHandlersCompilerPassTest extends TestCase
         $composite = $container->register('streak.composite.command_handler');
         $this->process($container);
 
-        $this->assertTrue($this->handlerRegistered($composite, 'foo'));
-        $this->assertTrue($this->handlerRegistered($composite, 'bar'));
-        $this->assertTrue($this->handlerRegistered($composite, 'moo'));
-        $this->assertFalse($this->handlerRegistered($composite, 'nope'));
+        self::assertTrue($this->handlerRegistered($composite, 'foo'));
+        self::assertTrue($this->handlerRegistered($composite, 'bar'));
+        self::assertTrue($this->handlerRegistered($composite, 'moo'));
+        self::assertFalse($this->handlerRegistered($composite, 'nope'));
     }
 
-    private function handlerRegistered(Definition $composite, $id) : bool
+    private function handlerRegistered(Definition $composite, $id): bool
     {
         $calls = $composite->getMethodCalls();
         $call = ['registerHandler', [new Reference($id)]];

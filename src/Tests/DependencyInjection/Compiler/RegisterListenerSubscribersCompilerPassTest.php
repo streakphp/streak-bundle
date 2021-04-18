@@ -48,10 +48,10 @@ class RegisterListenerSubscribersCompilerPassTest extends TestCase
         $bus = $container->register('streak.in_memory.event_bus');
         $this->process($container);
 
-        $this->assertTrue($this->subscriberRegistered($bus, 'foo'));
-        $this->assertTrue($this->subscriberRegistered($bus, 'bar'));
-        $this->assertTrue($this->subscriberRegistered($bus, 'moo'));
-        $this->assertFalse($this->subscriberRegistered($bus, 'nope'));
+        self::assertTrue($this->subscriberRegistered($bus, 'foo'));
+        self::assertTrue($this->subscriberRegistered($bus, 'bar'));
+        self::assertTrue($this->subscriberRegistered($bus, 'moo'));
+        self::assertFalse($this->subscriberRegistered($bus, 'nope'));
     }
 
     private function subscriberRegistered(Definition $bus, $id)

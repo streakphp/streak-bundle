@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Streak\StreakBundle\Tests\Command;
 
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Streak\Domain\Event;
 use Streak\Domain\Event\Subscription\Repository;
@@ -34,52 +33,18 @@ class RunSubscriptionCommandTest extends TestCase
 {
     public const TERMINAL_CLEAR_LINE = "\e[1G[2K";
 
-    /**
-     * @var Repository|MockObject
-     */
-    private $repository;
+    private Repository $repository;
 
-    /**
-     * @var EventStore|MockObject
-     */
-    private $store;
+    private EventStore $store;
 
-    /**
-     * @var Event\Subscription|MockObject
-     */
-    private $subscription1;
+    private Event\Subscription $subscription1;
 
-    /**
-     * @var Event|MockObject
-     */
-    private $event1;
+    private Event $event1;
+    private Event $event2;
 
-    /**
-     * @var Event|MockObject
-     */
-    private $event2;
+    private OutputInterface $output;
 
-    /**
-     * @var Event|MockObject
-     */
-    private $event3;
-
-    /**
-     * @var Event|MockObject
-     */
-    private $event4;
-
-    /**
-     * @var Event|MockObject
-     */
-    private $event5;
-
-    /**
-     * @var OutputInterface|MockObject
-     */
-    private $output;
-
-    protected function setUp() : void
+    protected function setUp(): void
     {
         $this->repository = $this->getMockBuilder(Repository::class)->getMockForAbstractClass();
         $this->store = $this->getMockBuilder(EventStore::class)->getMockForAbstractClass();
@@ -88,9 +53,6 @@ class RunSubscriptionCommandTest extends TestCase
 
         $this->event1 = $this->getMockBuilder(Event::class)->setMockClassName('event1')->getMockForAbstractClass();
         $this->event2 = $this->getMockBuilder(Event::class)->setMockClassName('event2')->getMockForAbstractClass();
-        $this->event3 = $this->getMockBuilder(Event::class)->setMockClassName('event3')->getMockForAbstractClass();
-        $this->event4 = $this->getMockBuilder(Event::class)->setMockClassName('event4')->getMockForAbstractClass();
-        $this->event5 = $this->getMockBuilder(Event::class)->setMockClassName('event5')->getMockForAbstractClass();
 
         $this->output = new RunSubscriptionCommandTest\TestOutput();
     }
@@ -98,14 +60,14 @@ class RunSubscriptionCommandTest extends TestCase
     public function testCommand()
     {
         $this->repository
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('find')
             ->with(SubscriptionId1::fromString('EC2BE294-C07A-4198-A159-4551686F14F9'))
             ->willReturn($this->subscription1)
         ;
 
         $this->subscription1
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('subscribeTo')
             ->with($this->store, null) // null is default --limit
             ->willReturn([$this->event1, $this->event2])
@@ -119,20 +81,20 @@ class RunSubscriptionCommandTest extends TestCase
             self::TERMINAL_CLEAR_LINE.
             "Subscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    2 events in < 1 sec."
         ;
-        $this->assertEquals($expected, $this->output->output);
+        self::assertEquals($expected, $this->output->output);
     }
 
     public function testCommandWithLimit()
     {
         $this->repository
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('find')
             ->with(SubscriptionId1::fromString('EC2BE294-C07A-4198-A159-4551686F14F9'))
             ->willReturn($this->subscription1)
         ;
 
         $this->subscription1
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('subscribeTo')
             ->with($this->store, 763723)
             ->willReturn([$this->event1, $this->event2])
@@ -146,7 +108,7 @@ class RunSubscriptionCommandTest extends TestCase
             self::TERMINAL_CLEAR_LINE.
             "Subscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    2 events in < 1 sec."
         ;
-        $this->assertEquals($expected, $this->output->output);
+        self::assertEquals($expected, $this->output->output);
     }
 
     public function testCommandWithInvalidType1()
@@ -176,7 +138,7 @@ class RunSubscriptionCommandTest extends TestCase
     public function testNotFound()
     {
         $this->repository
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('find')
             ->with(SubscriptionId1::fromString('EC2BE294-C07A-4198-A159-4551686F14F9'))
             ->willReturn(null)
@@ -188,20 +150,20 @@ class RunSubscriptionCommandTest extends TestCase
         $expected =
             "Subscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) not found."
         ;
-        $this->assertEquals($expected, $this->output->output);
+        self::assertEquals($expected, $this->output->output);
     }
 
     public function testErrorWithoutPausing()
     {
         $this->repository
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('find')
             ->with(SubscriptionId1::fromString('EC2BE294-C07A-4198-A159-4551686F14F9'))
             ->willReturn($this->subscription1)
         ;
 
         $this->subscription1
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('subscribeTo')
             ->with($this->store)
             ->willReturnCallback(function () {
@@ -212,7 +174,7 @@ class RunSubscriptionCommandTest extends TestCase
         ;
 
         $this->subscription1
-            ->expects($this->never())
+            ->expects(self::never())
             ->method('pause')
         ;
 
@@ -227,21 +189,21 @@ class RunSubscriptionCommandTest extends TestCase
                 self::TERMINAL_CLEAR_LINE.
                 "Subscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    2 events in < 1 sec."
             ;
-            $this->assertEquals($expected, $this->output->output);
+            self::assertEquals($expected, $this->output->output);
         }
     }
 
     public function testErrorWithPausing()
     {
         $this->repository
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('find')
             ->with(SubscriptionId1::fromString('EC2BE294-C07A-4198-A159-4551686F14F9'))
             ->willReturn($this->subscription1)
         ;
 
         $this->subscription1
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('subscribeTo')
             ->with($this->store)
             ->willReturnCallback(function () {
@@ -252,7 +214,7 @@ class RunSubscriptionCommandTest extends TestCase
         ;
 
         $this->subscription1
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('pause')
         ;
 
@@ -267,7 +229,7 @@ class RunSubscriptionCommandTest extends TestCase
                 self::TERMINAL_CLEAR_LINE.
                 "Subscription Streak\StreakBundle\Tests\Command\RunSubscriptionCommandTest\SubscriptionId1(EC2BE294-C07A-4198-A159-4551686F14F9) processed    2 events in < 1 sec."
             ;
-            $this->assertEquals($expected, $this->output->output);
+            self::assertEquals($expected, $this->output->output);
         }
     }
 }
@@ -289,21 +251,21 @@ class TestOutput extends Output
 
     public string $output = '';
 
-    public function section() : self
+    public function section(): self
     {
         return $this;
     }
 
-    public function clear() : void
+    public function clear(): void
     {
     }
 
-    protected function doWrite($message, $newline) : void
+    protected function doWrite($message, $newline): void
     {
         $this->output .= $message;
 
         if (true === $newline) {
-            $this->output .= PHP_EOL;
+            $this->output .= \PHP_EOL;
         }
     }
 }

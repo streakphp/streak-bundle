@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Streak\StreakBundle\Tests\LazyLoaders;
 
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Streak\Infrastructure\UnitOfWork;
 use Streak\StreakBundle\LazyLoaders\LazyLoadedUnitOfWork;
@@ -26,17 +25,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class LazyLoadedUnitOfWorkTest extends TestCase
 {
-    /**
-     * @var ContainerInterface|MockObject
-     */
-    private $container;
+    private ContainerInterface $container;
 
-    /**
-     * @var UnitOfWork|MockObject
-     */
-    private $uow;
+    private UnitOfWork $uow;
 
-    protected function setUp() : void
+    protected function setUp(): void
     {
         $this->container = $this->getMockBuilder(ContainerInterface::class)->getMockForAbstractClass();
         $this->uow = $this->getMockBuilder(UnitOfWork::class)->getMockForAbstractClass();
@@ -45,7 +38,7 @@ class LazyLoadedUnitOfWorkTest extends TestCase
     public function testObject()
     {
         $this->container
-            ->expects($this->atLeastOnce())
+            ->expects(self::atLeastOnce())
             ->method('get')
             ->with('streak.composite.unit_of_work')
             ->willReturn($this->uow)
@@ -56,66 +49,68 @@ class LazyLoadedUnitOfWorkTest extends TestCase
         $object = new \stdClass();
 
         $this->uow
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('add')
-            ->with($this->identicalTo($object))
+            ->with(self::identicalTo($object))
         ;
 
         $uow->add($object);
 
         $this->uow
-            ->expects($this->exactly(2))
+            ->expects(self::exactly(2))
             ->method('has')
-            ->with($this->identicalTo($object))
+            ->with(self::identicalTo($object))
             ->willReturnOnConsecutiveCalls(true, false)
         ;
 
-        $this->assertTrue($uow->has($object));
+        self::assertTrue($uow->has($object));
 
         $this->uow
-            ->expects($this->exactly(2))
+            ->expects(self::exactly(2))
             ->method('uncommitted')
             ->willReturnOnConsecutiveCalls([$object], [])
         ;
 
-        $this->assertSame([$object], $uow->uncommitted());
+        self::assertSame([$object], $uow->uncommitted());
 
         $this->uow
-            ->expects($this->exactly(2))
+            ->expects(self::exactly(2))
             ->method('count')
             ->willReturnOnConsecutiveCalls(1, 0)
         ;
 
-        $this->assertSame(1, $uow->count());
+        self::assertSame(1, $uow->count());
 
         $this->uow
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('remove')
-            ->with($this->identicalTo($object))
+            ->with(self::identicalTo($object))
         ;
 
         $uow->remove($object);
 
-        $this->assertFalse($uow->has($object));
-        $this->assertSame([], $uow->uncommitted());
-        $this->assertSame(0, $uow->count());
+        self::assertFalse($uow->has($object));
+        self::assertSame([], $uow->uncommitted());
+        self::assertSame(0, $uow->count());
 
         $this->uow
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('clear')
         ;
 
         $uow->clear();
 
         $this->uow
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('commit')
-            ->willReturnCallback(function () { yield from []; })
+            ->willReturnCallback(function () {
+                yield from [];
+            })
         ;
 
         $committed = $uow->commit();
         $committed = iterator_to_array($committed);
 
-        $this->assertEmpty($committed);
+        self::assertEmpty($committed);
     }
 }

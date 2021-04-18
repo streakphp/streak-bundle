@@ -22,12 +22,12 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 abstract class SubscriptionCommand extends Command
 {
-    protected function formatSubscriptionId(Listener\Id $id) : string
+    protected function formatSubscriptionId(Listener\Id $id): string
     {
-        return sprintf('<fg=blue>%s</>(<fg=cyan>%s</>)', get_class($id), $id->toString());
+        return sprintf('<fg=blue>%s</>(<fg=cyan>%s</>)', \get_class($id), $id->toString());
     }
 
-    protected function subscriptionId(InputInterface $input) : Listener\Id
+    protected function subscriptionId(InputInterface $input): Listener\Id
     {
         $class = $input->getArgument('subscription-type');
 
