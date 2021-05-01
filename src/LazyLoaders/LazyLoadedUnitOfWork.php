@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Streak\StreakBundle\LazyLoaders;
 
-use Streak\Infrastructure\UnitOfWork;
+use Streak\Infrastructure\Domain\UnitOfWork;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -32,36 +32,36 @@ class LazyLoadedUnitOfWork implements UnitOfWork
 
     public function add($object): void
     {
-        $this->container->get('streak.composite.unit_of_work')->add($object);
+        $this->container->get(UnitOfWork\CompositeUnitOfWork::class)->add($object);
     }
 
     public function remove($object): void
     {
-        $this->container->get('streak.composite.unit_of_work')->remove($object);
+        $this->container->get(UnitOfWork\CompositeUnitOfWork::class)->remove($object);
     }
 
     public function has($object): bool
     {
-        return $this->container->get('streak.composite.unit_of_work')->has($object);
+        return $this->container->get(UnitOfWork\CompositeUnitOfWork::class)->has($object);
     }
 
     public function uncommitted(): array
     {
-        return $this->container->get('streak.composite.unit_of_work')->uncommitted();
+        return $this->container->get(UnitOfWork\CompositeUnitOfWork::class)->uncommitted();
     }
 
     public function count(): int
     {
-        return $this->container->get('streak.composite.unit_of_work')->count();
+        return $this->container->get(UnitOfWork\CompositeUnitOfWork::class)->count();
     }
 
     public function commit(): \Generator
     {
-        yield from $this->container->get('streak.composite.unit_of_work')->commit();
+        yield from $this->container->get(UnitOfWork\CompositeUnitOfWork::class)->commit();
     }
 
     public function clear(): void
     {
-        $this->container->get('streak.composite.unit_of_work')->clear();
+        $this->container->get(UnitOfWork\CompositeUnitOfWork::class)->clear();
     }
 }

@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Streak\StreakBundle\Tests\DependencyInjection\Compiler;
 
 use PHPUnit\Framework\TestCase;
+use Streak\Infrastructure\Domain\AggregateRoot;
 use Streak\StreakBundle\DependencyInjection\Compiler\RegisterAggregateFactoriesCompilerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -45,7 +46,7 @@ class RegisterAggregateFactoriesCompilerPassTest extends TestCase
             ->register('nope')
         ;
 
-        $composite = $container->register('streak.composite.aggregate_factory');
+        $composite = $container->register(AggregateRoot\Factory\CompositeFactory::class);
         $this->process($container);
 
         self::assertTrue($this->factoryRegistered($composite, 'foo'));

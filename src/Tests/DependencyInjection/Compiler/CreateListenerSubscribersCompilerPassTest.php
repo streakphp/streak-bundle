@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Streak\StreakBundle\Tests\DependencyInjection\Compiler;
 
 use PHPUnit\Framework\TestCase;
-use Streak\Domain\Event\Subscriber;
+use Streak\Infrastructure\Domain\Event\Subscriber;
 use Streak\StreakBundle\DependencyInjection\Compiler\CreateListenerSubscribersCompilerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 

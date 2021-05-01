@@ -28,7 +28,7 @@ $config
             'php_unit_mock' => true,
             'php_unit_test_case_static_method_calls' => ['call_type' => 'self'],
             'header_comment' => [
-                'commentType' => 'PHPDoc',
+                'comment_type' => 'PHPDoc',
                 'location' => 'after_open',
                 'separate' => 'both',
                 'header' => <<<'HEADER'

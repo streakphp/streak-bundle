@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Streak\StreakBundle\DependencyInjection\Compiler;
 
+use Streak\Infrastructure\Domain\Event;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
@@ -26,7 +27,7 @@ class RegisterListenerFactoriesCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $composite = $container->findDefinition('streak.composite.listener_factory');
+        $composite = $container->findDefinition(Event\Listener\CompositeFactory::class);
         $factories = $container->findTaggedServiceIds('streak.listener_factory');
 
         foreach ($factories as $id => $tags) {

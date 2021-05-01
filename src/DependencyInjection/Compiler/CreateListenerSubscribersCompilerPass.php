@@ -13,7 +13,9 @@ declare(strict_types=1);
 
 namespace Streak\StreakBundle\DependencyInjection\Compiler;
 
-use Streak\Domain\Event;
+use Streak\Domain\Event\Subscription;
+use Streak\Domain\EventBus;
+use Streak\Infrastructure\Domain\Event;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -34,12 +36,12 @@ class CreateListenerSubscribersCompilerPass implements CompilerPassInterface
             $subscriber = new Definition(Event\Subscriber::class);
             $subscriber->setArguments([
                 new Reference($id),
-                new Reference('streak.subscription_factory'),
-                new Reference('streak.subscription_repository'),
+                new Reference(Subscription\Factory::class),
+                new Reference(Subscription\Repository::class),
             ]);
             $subscriber->setPublic(false);
             $subscriber->addTag('streak.listener_subscriber');
-            $subscriber->addMethodCall('listenTo', [new Reference('streak.event_bus')]);
+            $subscriber->addMethodCall('listenTo', [new Reference(EventBus::class)]);
 
             $container->setDefinition($id.'.__streak_subscriber', $subscriber);
         }
