@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Streak\StreakBundle\Tests\LazyLoaders;
 
 use PHPUnit\Framework\TestCase;
-use Streak\Infrastructure\UnitOfWork;
+use Streak\Infrastructure\Domain\UnitOfWork;
 use Streak\StreakBundle\LazyLoaders\LazyLoadedUnitOfWork;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -40,7 +40,7 @@ class LazyLoadedUnitOfWorkTest extends TestCase
         $this->container
             ->expects(self::atLeastOnce())
             ->method('get')
-            ->with('streak.composite.unit_of_work')
+            ->with(UnitOfWork\CompositeUnitOfWork::class)
             ->willReturn($this->uow)
         ;
 

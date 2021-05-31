@@ -13,10 +13,11 @@ declare(strict_types=1);
 
 namespace Streak\StreakBundle;
 
-use Streak\Application\CommandHandler;
-use Streak\Application\QueryHandler;
+use Streak\Application\Sensor;
 use Streak\Domain\AggregateRoot;
+use Streak\Domain\CommandHandler;
 use Streak\Domain\Event\Listener;
+use Streak\Domain\QueryHandler;
 use Streak\StreakBundle\DependencyInjection\Compiler\CreateListenerSubscribersCompilerPass;
 use Streak\StreakBundle\DependencyInjection\Compiler\RegisterAggregateFactoriesCompilerPass;
 use Streak\StreakBundle\DependencyInjection\Compiler\RegisterCommandHandlersCompilerPass;
@@ -39,6 +40,7 @@ class StreakBundle extends Bundle
         $container->registerForAutoconfiguration(CommandHandler::class)->addTag('streak.command_handler');
         $container->registerForAutoconfiguration(QueryHandler::class)->addTag('streak.query_handler');
         $container->registerForAutoconfiguration(Listener\Factory::class)->addTag('streak.listener_factory');
+        $container->registerForAutoconfiguration(Sensor\Factory::class)->addTag('streak.sensor_factory');
 
         $container->addCompilerPass(new RegisterListenerFactoriesCompilerPass());
         $container->addCompilerPass(new CreateListenerSubscribersCompilerPass());

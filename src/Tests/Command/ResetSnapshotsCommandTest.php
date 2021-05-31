@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Streak\StreakBundle\Tests\Command;
 
 use PHPUnit\Framework\TestCase;
-use Streak\Infrastructure\AggregateRoot\Snapshotter;
+use Streak\Infrastructure\Domain\AggregateRoot\Snapshotter;
 use Streak\StreakBundle\Command\ResetSnapshotsCommand;
 use Streak\StreakBundle\Tests\Command\ResetSnapshotsCommandTest\ResettableStorage;
 use Symfony\Component\Console\Input\StringInput;
@@ -126,8 +126,8 @@ class ResetSnapshotsCommandTest extends TestCase
 
 namespace Streak\StreakBundle\Tests\Command\ResetSnapshotsCommandTest;
 
-use Streak\Infrastructure\AggregateRoot\Snapshotter\Storage;
-use Streak\Infrastructure\Resettable;
+use Streak\Infrastructure\Domain\AggregateRoot\Snapshotter\Storage;
+use Streak\Infrastructure\Domain\Resettable;
 
 abstract class ResettableStorage implements Storage, Resettable
 {

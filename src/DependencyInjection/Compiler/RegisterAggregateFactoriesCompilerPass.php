@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Streak\StreakBundle\DependencyInjection\Compiler;
 
+use Streak\Infrastructure\Domain\AggregateRoot;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
@@ -26,7 +27,7 @@ class RegisterAggregateFactoriesCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $composite = $container->findDefinition('streak.composite.aggregate_factory');
+        $composite = $container->findDefinition(AggregateRoot\Factory\CompositeFactory::class);
         $factories = $container->findTaggedServiceIds('streak.aggregate_factory');
 
         foreach ($factories as $id => $tags) {

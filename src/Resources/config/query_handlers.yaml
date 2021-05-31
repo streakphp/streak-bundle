@@ -2,7 +2,7 @@ services:
   streak.event_listener.query_handler:
     class: Streak\Application\QueryHandler\EventListenerHandler
     arguments:
-      - '@streak.subscription_repository'
+      - '@Streak\Domain\Event\Subscription\Repository'
     tags:
       - 'streak.query_handler'
 

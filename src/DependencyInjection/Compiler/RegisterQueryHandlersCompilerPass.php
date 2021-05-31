@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Streak\StreakBundle\DependencyInjection\Compiler;
 
+use Streak\Infrastructure\Application\QueryBus\SynchronousQueryBus;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
@@ -26,7 +27,7 @@ class RegisterQueryHandlersCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $composite = $container->findDefinition('streak.composite.query_handler');
+        $composite = $container->findDefinition(SynchronousQueryBus::class);
         $factories = $container->findTaggedServiceIds('streak.query_handler');
 
         foreach ($factories as $id => $tags) {
@@ -37,7 +38,7 @@ class RegisterQueryHandlersCompilerPass implements CompilerPassInterface
                 continue;
             }
 
-            $composite->addMethodCall('registerHandler', [new Reference($id)]);
+            $composite->addMethodCall('register', [new Reference($id)]);
         }
     }
 }

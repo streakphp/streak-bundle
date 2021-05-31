@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Streak\StreakBundle\Command;
 
-use Streak\Infrastructure\AggregateRoot\Snapshotter;
-use Streak\Infrastructure\Resettable;
+use Streak\Infrastructure\Domain\AggregateRoot\Snapshotter;
+use Streak\Infrastructure\Domain\Resettable;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Streak\StreakBundle\Command;
 
 use Streak\Domain\EventStore;
-use Streak\Infrastructure\EventStore\Schemable;
+use Streak\Infrastructure\Domain\EventStore\Schemable;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

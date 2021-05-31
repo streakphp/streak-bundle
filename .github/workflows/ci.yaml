@@ -23,12 +23,12 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ./build/.composer
-          key: ${{ runner.os }}-composer-v1-${{ hashFiles('composer.lock') }}
+          key: ${{ runner.os }}-composer-v1-${{ hashFiles('composer.json') }}
           restore-keys: ${{ runner.os }}-composer-v1-
       - name: Install dependencies
         run: docker-compose run --rm --no-deps php composer install --no-scripts --no-interaction --optimize-autoloader --ansi
       - name: Run php-cs-fixer
-        run: docker-compose run --rm --no-deps php bin/php-cs-fixer fix --diff --dry-run --ansi --config=.php_cs.dist
+        run: docker-compose run --rm --no-deps php bin/php-cs-fixer fix --diff --dry-run --ansi --config=.php-cs-fixer.dist.php
   run-phpunit:
     name: phpunit
     runs-on: ubuntu-latest
@@ -41,7 +41,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ./build/.composer
-          key: ${{ runner.os }}-composer-v1-${{ hashFiles('composer.lock') }}
+          key: ${{ runner.os }}-composer-v1-${{ hashFiles('composer.json') }}
           restore-keys: ${{ runner.os }}-composer-v1-
       - name: Install dependencies
         run: docker-compose run --rm php composer install --no-scripts --no-interaction --optimize-autoloader --ansi
@@ -65,9 +65,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ./build/.composer
-          key: ${{ runner.os }}-composer-v1-${{ hashFiles('composer.lock') }}
+          key: ${{ runner.os }}-composer-v1-${{ hashFiles('composer.json') }}
           restore-keys: ${{ runner.os }}-composer-v1-
       - name: Install dependencies
-        run: docker-compose run --rm --no-deps php composer install --no-scripts --no-interaction --optimize-autoloader --ansi
+        run: docker-compose run --rm --no-deps php composer install --no-interaction --optimize-autoloader --ansi
       - name: Run rector
         run: docker-compose run --rm --no-deps php bin/rector --no-progress-bar --dry-run --ansi

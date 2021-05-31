@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Streak\StreakBundle\DependencyInjection\Compiler;
 
+use Streak\Infrastructure\Domain\EventBus\InMemoryEventBus;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
@@ -26,7 +27,7 @@ class RegisterListenerSubscribersCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $composite = $container->findDefinition('streak.in_memory.event_bus');
+        $composite = $container->findDefinition(InMemoryEventBus::class);
         $factories = $container->findTaggedServiceIds('streak.listener_subscriber');
 
         foreach ($factories as $id => $tags) {

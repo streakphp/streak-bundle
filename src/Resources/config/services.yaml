@@ -6,11 +6,14 @@ parameters:
   streak.snapshotting.interval: 1
 
 services:
+  _defaults:
+    public: false
+    autowire: false
 
-  streak.clock.server_time:
-    class: Streak\Infrastructure\ServerTimeClock
+  Streak\Infrastructure\Domain\Clock\ServerTimeClock: ~
 
-  streak.clock: '@streak.clock.server_time'
+  Streak\Domain\Clock:
+    alias: Streak\Infrastructure\Domain\Clock\ServerTimeClock
 
   streak.redis:
     class: Redis
@@ -18,287 +21,234 @@ services:
     - ['pconnect', ['%streak.redis.host%', '%streak.redis.port%']]
     - ['select', ['%streak.redis.database%']]
 
-  streak.php.serializer:
-    class: Streak\Infrastructure\Serializer\PhpSerializer
+  Streak\Infrastructure\Domain\Serializer\PhpSerializer: ~
 
-  streak.igbinary.serializer:
-    class: Streak\Infrastructure\Serializer\IGBinarySerializer
+  Streak\Infrastructure\Domain\Serializer\IGBinarySerializer: ~
 
-  streak.nested.object_converter:
-    class: Streak\Infrastructure\Event\Converter\NestedObjectConverter
+  Streak\Infrastructure\Domain\Event\Converter\NestedObjectConverter: ~
 
-  streak.composite.object_converter:
-    class: Streak\Infrastructure\Event\Converter\CompositeConverter
+  Streak\Infrastructure\Domain\Event\Converter\CompositeConverter:
     arguments:
-      - '@streak.nested.object_converter'
+      - '@Streak\Infrastructure\Domain\Event\Converter\NestedObjectConverter'
 
-  streak.object_converter: '@streak.composite.object_converter'
+  Streak\Domain\Event\Converter:
+    alias: Streak\Infrastructure\Domain\Event\Converter\CompositeConverter
 
-  streak.dbal.postgres.subscription_dao:
-    class: Streak\Infrastructure\Event\Subscription\DAO\DbalPostgresDAO
+  Streak\Infrastructure\Domain\Event\Subscription\DAO\DbalPostgresDAO:
     arguments:
-      - '@streak.subscription_factory'
-      - '@streak.listener_factory'
+      - '@Streak\Domain\Event\Subscription\Factory'
+      - '@Streak\Domain\Event\Listener\Factory'
       - '@streak.dbal.postgres.event_store.connection'
-      - '@streak.object_converter'
+      - '@Streak\Domain\Event\Converter'
 
-  streak.in_memory.subscription_dao:
-    class: Streak\Infrastructure\Event\Subscription\DAO\InMemoryDAO
+  Streak\Infrastructure\Domain\Event\Subscription\DAO\InMemoryDAO: ~
+
+  Streak\Infrastructure\Domain\Event\Subscription\DAO:
+    alias: Streak\Infrastructure\Domain\Event\Subscription\DAO\DbalPostgresDAO
+
+  Streak\Infrastructure\Domain\Event\Subscription\DAO\IdentityMappingDao:
+    decorates: Streak\Infrastructure\Domain\Event\Subscription\DAO
     arguments:
+      - '@.inner'
 
-  streak.subscription_dao: '@streak.dbal.postgres.subscription_dao'
-
-  streak.identity_mapping.subscription_dao:
-    class: Streak\Infrastructure\Event\Subscription\DAO\IdentityMappingDao
-    decorates: streak.subscription_dao
+  Streak\Infrastructure\Domain\UnitOfWork\EventStoreUnitOfWork:
     arguments:
-      - '@streak.identity_mapping.subscription_dao.inner'
+      - '@Streak\Domain\EventStore'
 
-  streak.event_store.unit_of_work:
-    class: Streak\Infrastructure\UnitOfWork\EventStoreUnitOfWork
+  Streak\Infrastructure\Domain\UnitOfWork\SubscriptionDAOUnitOfWork:
     arguments:
-      - '@streak.event_store'
+      - '@Streak\Infrastructure\Domain\Event\Subscription\DAO'
 
-  streak.subscription_dao.unit_of_work:
-    class: Streak\Infrastructure\UnitOfWork\SubscriptionDAOUnitOfWork
+  Streak\Infrastructure\Domain\UnitOfWork\SnapshottingUnitOfWork:
+    decorates: Streak\Infrastructure\Domain\UnitOfWork\EventStoreUnitOfWork
     arguments:
-      - '@streak.subscription_dao'
-
-  streak.snapshotting.unit_of_work:
-    class: Streak\Infrastructure\UnitOfWork\SnapshottingUnitOfWork
-    decorates: streak.event_store.unit_of_work
-    arguments:
-      - '@streak.snapshotting.unit_of_work.inner'
-      - '@streak.snapshotter'
+      - '@.inner'
+      - '@Streak\Infrastructure\Domain\AggregateRoot\Snapshotter'
       - '%streak.snapshotting.interval%'
 
-  streak.composite.unit_of_work:
-    class: Streak\Infrastructure\UnitOfWork\CompositeUnitOfWork
+  Streak\Infrastructure\Domain\UnitOfWork\CompositeUnitOfWork:
     arguments:
-      - '@streak.event_store.unit_of_work'
-      - '@streak.subscription_dao.unit_of_work'
+      - '@Streak\Infrastructure\Domain\UnitOfWork\EventStoreUnitOfWork'
+      - '@Streak\Infrastructure\Domain\UnitOfWork\SubscriptionDAOUnitOfWork'
     public: true
 
-  streak.lazy_loaded.unit_of_work:
-    class: Streak\StreakBundle\LazyLoaders\LazyLoadedUnitOfWork
+  Streak\StreakBundle\LazyLoaders\LazyLoadedUnitOfWork:
     arguments:
       - '@service_container'
 
-  streak.unit_of_work: '@streak.lazy_loaded.unit_of_work'
+  Streak\Infrastructure\Domain\UnitOfWork:
+    alias: Streak\StreakBundle\LazyLoaders\LazyLoadedUnitOfWork
 
-  streak.event_sourced.subscription_factory:
-    class: Streak\Infrastructure\Event\Sourced\Subscription\Factory
+  Streak\Infrastructure\Domain\Event\Sourced\Subscription\Factory:
     arguments:
-      - '@streak.clock'
+      - '@Streak\Domain\Clock'
 
-  streak.subscription_dao.subscription_factory:
-    class: Streak\Infrastructure\Event\Subscription\DAO\Subscription\Factory
+  Streak\Infrastructure\Domain\Event\Subscription\DAO\Subscription\Factory:
     arguments:
-      - '@streak.clock'
+      - '@Streak\Domain\Clock'
 
-  streak.subscription_factory: '@streak.subscription_dao.subscription_factory'
+  Streak\Domain\Event\Subscription\Factory:
+    alias: Streak\Infrastructure\Domain\Event\Sourced\Subscription\Factory
 
-  streak.committing.subscription_factory:
-    class: Streak\Infrastructure\Event\Subscription\CommittingSubscription\Factory
-    decorates: streak.subscription_factory
+  Streak\Infrastructure\Domain\Event\Subscription\CommittingSubscription\Factory:
+    decorates: Streak\Domain\Event\Subscription\Factory
     arguments:
-      - '@streak.committing.subscription_factory.inner'
-      - '@streak.unit_of_work'
+      - '@.inner'
+      - '@Streak\Infrastructure\Domain\UnitOfWork'
 
-  streak.dbal.transactional.subscription_factory:
-    class: Streak\Infrastructure\Event\Subscription\DbalTransactionalSubscription\Factory
-    decorates: streak.subscription_factory
+  Streak\Infrastructure\Domain\Event\Subscription\DbalTransactionalSubscription\Factory:
+    decorates: Streak\Domain\Event\Subscription\Factory
     arguments:
-      - '@streak.dbal.transactional.subscription_factory.inner'
+      - '@.inner'
       - '@streak.dbal.postgres.event_store.connection'
       - 1
 
-  streak.composite.listener_factory:
-    class: Streak\Infrastructure\Event\Listener\CompositeFactory
+  Streak\Infrastructure\Domain\Event\Listener\CompositeFactory: ~
 
-  streak.listener_factory: '@streak.composite.listener_factory'
+  Streak\Domain\Event\Listener\Factory:
+    alias: Streak\Infrastructure\Domain\Event\Listener\CompositeFactory
 
-  streak.event_sourced.subscription_repository:
-    class: Streak\Infrastructure\Event\Subscription\EventSourcedRepository
+  Streak\Infrastructure\Domain\Event\Subscription\EventSourcedRepository:
     arguments:
-      - '@streak.subscription_factory'
-      - '@streak.listener_factory'
-      - '@streak.event_store'
-      - '@streak.unit_of_work'
+      - '@Streak\Domain\Event\Subscription\Factory'
+      - '@Streak\Domain\Event\Listener\Factory'
+      - '@Streak\Domain\EventStore'
+      - '@Streak\Infrastructure\Domain\UnitOfWork'
 
-  streak.subscription_dao.subscription_repository:
-    class: Streak\Infrastructure\Event\Subscription\DAO\DAORepository
+  Streak\Infrastructure\Domain\Event\Subscription\DAO\DAORepository:
     arguments:
-      - '@streak.subscription_dao'
-      - '@streak.unit_of_work'
+      - '@Streak\Infrastructure\Domain\Event\Subscription\DAO'
+      - '@Streak\Infrastructure\Domain\UnitOfWork'
 
-  streak.subscription_repository: '@streak.subscription_dao.subscription_repository'
+  Streak\Domain\Event\Subscription\Repository:
+    alias: Streak\Infrastructure\Domain\Event\Subscription\EventSourcedRepository
 
-  streak.null.event_bus:
-    class: Streak\Infrastructure\EventBus\NullEventBus
+  Streak\Infrastructure\Domain\EventBus\NullEventBus: ~
 
-  streak.in_memory.event_bus:
-    class: Streak\Infrastructure\EventBus\InMemoryEventBus
+  Streak\Infrastructure\Domain\EventBus\InMemoryEventBus: ~
 
-  streak.event_bus: '@streak.in_memory.event_bus'
+  Streak\Domain\EventBus:
+    alias: Streak\Infrastructure\Domain\EventBus\InMemoryEventBus
 
-  streak.composite.command_handler:
-    class: Streak\Infrastructure\CommandHandler\CompositeCommandHandler
+  Streak\Infrastructure\Application\CommandBus\NullCommandBus: ~
 
-  streak.command_handler: '@streak.composite.command_handler'
+  Streak\Infrastructure\Application\CommandBus\SynchronousCommandBus: ~
 
-  streak.committing.command_handler:
-    class: Streak\Infrastructure\CommandHandler\CommittingCommandHandler
-    decorates: streak.command_handler
-    arguments:
-      - '@streak.committing.command_handler.inner'
-      - '@streak.unit_of_work'
-
-  streak.null.command_bus:
-    class: Streak\Infrastructure\CommandBus\NullCommandBus
-
-  streak.synchronous.command_bus:
-    class: Streak\Infrastructure\CommandBus\SynchronousCommandBus
-    calls:
-      - [ register, [ '@streak.command_handler' ] ]
-
-  streak.command_bus:
-    alias: 'streak.synchronous.command_bus'
+  Streak\Application\CommandBus:
+    alias: Streak\Infrastructure\Application\CommandBus\SynchronousCommandBus
     public: true
 
-  streak.composite.query_handler:
-    class: Streak\Infrastructure\QueryHandler\CompositeQueryHandler
+  Streak\Infrastructure\Application\CommandBus\CommittingCommandBus:
+    decorates: Streak\Application\CommandBus
+    arguments:
+      - '@.inner'
+      - '@Streak\Infrastructure\Domain\UnitOfWork'
 
-  streak.query_handler: '@streak.composite.query_handler'
+  Streak\Infrastructure\Application\CommandBus\DbalTransactionalCommandBus:
+    decorates: Streak\Application\CommandBus
+    arguments:
+      - '@.inner'
+      - '@streak.dbal.postgres.event_store.connection'
 
-  streak.synchronous.query_bus:
-    class: Streak\Infrastructure\QueryBus\SynchronousQueryBus
-    calls:
-      - [ register, [ '@streak.query_handler' ]]
+  Streak\Infrastructure\Application\CommandBus\RetryingCommandBus:
+    decorates: Streak\Application\CommandBus
+    arguments:
+      - '@.inner'
+      - '%streak.command_retry_max_attempts%'
 
-  streak.query_bus:
-    alias: 'streak.synchronous.query_bus'
+  Streak\Infrastructure\Application\QueryBus\SynchronousQueryBus: ~
+
+  Streak\Application\QueryBus:
+    alias: Streak\Infrastructure\Application\QueryBus\SynchronousQueryBus
     public: true
 
-  streak.retrying.command_bus:
-    class: Streak\Infrastructure\CommandBus\RetryingCommandBus
-    decorates: streak.command_bus
-    arguments:
-    - '@streak.retrying.command_bus.inner'
-    - '%streak.command_retry_max_attempts%'
-
-  streak.dbal.postgres.event_store:
-    class: Streak\Infrastructure\EventStore\DbalPostgresEventStore
+  Streak\Infrastructure\Domain\EventStore\DbalPostgresEventStore:
     arguments:
       - '@streak.dbal.postgres.event_store.connection'
-      - '@streak.object_converter'
+      - '@Streak\Domain\Event\Converter'
 
-  streak.in_memory.event_store:
-    class: Streak\Infrastructure\EventStore\InMemoryEventStore
+  Streak\Infrastructure\Domain\EventStore\InMemoryEventStore: ~
 
-  streak.event_store:
-    alias: 'streak.dbal.postgres.event_store'
+  Streak\Domain\EventStore:
+    alias: Streak\Infrastructure\Domain\EventStore\DbalPostgresEventStore
     public: true
 
-  streak.publishing.event_store:
-    class: Streak\Infrastructure\EventStore\PublishingEventStore
-    decorates: streak.event_store
+  Streak\Infrastructure\Domain\EventStore\PublishingEventStore:
+    decorates: Streak\Domain\EventStore
     arguments:
-      - '@streak.publishing.event_store.inner'
-      - '@streak.event_bus'
+      - '@.inner'
+      - '@Streak\Domain\EventBus'
 
-  streak.composite.aggregate_factory:
-    class: Streak\Infrastructure\AggregateRoot\Factory\CompositeFactory
+  Streak\Infrastructure\Domain\AggregateRoot\Factory\CompositeFactory: ~
 
-  streak.aggregate_factory: '@streak.composite.aggregate_factory'
+  Streak\Domain\AggregateRoot\Factory:
+    alias: Streak\Infrastructure\Domain\AggregateRoot\Factory\CompositeFactory
 
-  streak.snapshotter_serializer: '@streak.php.serializer'
+  Streak\Infrastructure\Domain\Serializer:
+    alias: Streak\Infrastructure\Domain\Serializer\PhpSerializer
 
-  streak.redis.snapshotter_storage:
-    class: Streak\Infrastructure\AggregateRoot\Snapshotter\Storage\RedisStorage
+  Streak\Infrastructure\Domain\AggregateRoot\Snapshotter\Storage\RedisStorage:
     arguments:
       - '@streak.redis'
 
-  streak.in_memory.snapshotter_storage:
-    class: Streak\Infrastructure\AggregateRoot\Snapshotter\Storage\InMemoryStorage
+  Streak\Infrastructure\Domain\AggregateRoot\Snapshotter\Storage\InMemoryStorage: ~
 
-  streak.snapshotter_storage: '@streak.redis.snapshotter_storage'
+  Streak\Infrastructure\Domain\AggregateRoot\Snapshotter\Storage:
+    alias: Streak\Infrastructure\Domain\AggregateRoot\Snapshotter\Storage\RedisStorage
 
-  streak.snapshottable_aggregates.snapshotter:
-    class: Streak\Infrastructure\AggregateRoot\Snapshotter\SnapshottableAggregatesSnapshotter
+  Streak\Infrastructure\Domain\AggregateRoot\Snapshotter\SnapshottableAggregatesSnapshotter:
     arguments:
-      - '@streak.snapshotter_serializer'
-      - '@streak.snapshotter_storage'
+      - '@Streak\Infrastructure\Domain\Serializer'
+      - '@Streak\Infrastructure\Domain\AggregateRoot\Snapshotter\Storage'
 
-  streak.null.snapshotter:
-    class: Streak\Infrastructure\AggregateRoot\Snapshotter\NullSnapshotter
+  Streak\Infrastructure\Domain\AggregateRoot\Snapshotter\NullSnapshotter: ~
 
-  streak.snapshotter: '@streak.null.snapshotter'
+  Streak\Infrastructure\Domain\AggregateRoot\Snapshotter:
+    alias: Streak\Infrastructure\Domain\AggregateRoot\Snapshotter\NullSnapshotter
 
-  streak.event_sourced.aggregate_repository:
-    class: Streak\Infrastructure\AggregateRoot\Repository\EventSourcedRepository
+  Streak\Infrastructure\Domain\AggregateRoot\Repository\EventSourcedRepository:
     arguments:
-      - '@streak.aggregate_factory'
-      - '@streak.event_store'
-      - '@streak.snapshotter'
-      - '@streak.unit_of_work'
+      - '@Streak\Domain\AggregateRoot\Factory'
+      - '@Streak\Domain\EventStore'
+      - '@Streak\Infrastructure\Domain\AggregateRoot\Snapshotter'
+      - '@Streak\Infrastructure\Domain\UnitOfWork'
 
-  streak.aggregate_repository: '@streak.event_sourced.aggregate_repository'
+  Streak\Domain\AggregateRoot\Repository:
+    alias: Streak\Infrastructure\Domain\AggregateRoot\Repository\EventSourcedRepository
 
-  streak.subscriptions_run.command:
-    class: Streak\StreakBundle\Command\RunSubscriptionsCommand
+  Streak\StreakBundle\Command\RunSubscriptionsCommand:
     arguments:
-      - '@streak.subscription_repository'
+      - '@Streak\Domain\Event\Subscription\Repository'
     tags:
       - { name: 'console.command' }
 
-  streak.subscription_run.command:
-    class: Streak\StreakBundle\Command\RunSubscriptionCommand
+  Streak\StreakBundle\Command\RunSubscriptionCommand:
     arguments:
-      - '@streak.subscription_repository'
-      - '@streak.event_store'
+      - '@Streak\Domain\Event\Subscription\Repository'
+      - '@Streak\Domain\EventStore'
     tags:
       - { name: 'console.command' }
 
-  streak.subscription_restart.command:
-    class: Streak\StreakBundle\Command\RestartSubscriptionCommand
+  Streak\StreakBundle\Command\RestartSubscriptionCommand:
     arguments:
-      - '@streak.subscription_repository'
+      - '@Streak\Domain\Event\Subscription\Repository'
     tags:
       - { name: 'console.command' }
 
-  streak.reset_snasphots.command:
-    class: Streak\StreakBundle\Command\ResetSnapshotsCommand
+  Streak\StreakBundle\Command\ResetSnapshotsCommand:
     arguments:
-      - '@streak.snapshotter_storage'
+      - '@Streak\Infrastructure\Domain\AggregateRoot\Snapshotter\Storage'
     tags:
       - { name: 'console.command' }
 
-  streak.create_event_store.command:
-    class: Streak\StreakBundle\Command\CreateEventStoreSchemaCommand
+  Streak\StreakBundle\Command\CreateEventStoreSchemaCommand:
     arguments:
-      - '@streak.event_store'
+      - '@Streak\Domain\EventStore'
     tags:
       - { name: 'console.command' }
 
-  streak.drop_event_store.command:
-    class: Streak\StreakBundle\Command\DropEventStoreSchemaCommand
+  Streak\StreakBundle\Command\DropEventStoreSchemaCommand:
     arguments:
-      - '@streak.event_store'
+      - '@Streak\Domain\EventStore'
     tags:
       - { name: 'console.command' }
-
-  Streak\Domain\Clock: '@streak.clock'
-  Streak\Domain\Event\Converter: '@streak.object_converter'
-  Streak\Infrastructure\Event\Subscription\DAO: '@streak.subscription_dao'
-  Streak\Infrastructure\UnitOfWork: '@streak.unit_of_work'
-  Streak\Domain\Event\Subscription\Factory: '@streak.subscription_factory'
-  Streak\Domain\Event\Listener\Factory: '@streak.listener_factory'
-  Streak\Domain\Event\Subscription\Repository: '@streak.subscription_repository'
-  Streak\Domain\EventBus: '@streak.event_bus'
-  Streak\Application\CommandHandler: '@streak.command_handler'
-  Streak\Application\CommandBus: '@streak.command_bus'
-  Streak\Domain\EventStore: '@streak.event_store'
-  Streak\Domain\AggregateRoot\Factory: '@streak.aggregate_factory'
-  Streak\Infrastructure\AggregateRoot\Snapshotter: '@streak.snapshotter'
-  Streak\Domain\AggregateRoot\Repository: '@streak.aggregate_repository'

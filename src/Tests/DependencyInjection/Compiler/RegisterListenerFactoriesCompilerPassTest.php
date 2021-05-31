@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Streak\StreakBundle\Tests\DependencyInjection\Compiler;
 
 use PHPUnit\Framework\TestCase;
+use Streak\Infrastructure\Domain\Event;
 use Streak\StreakBundle\DependencyInjection\Compiler\RegisterListenerFactoriesCompilerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -50,7 +51,7 @@ class RegisterListenerFactoriesCompilerPassTest extends TestCase
             ->setDecoratedService('moo')
         ;
 
-        $composite = $container->register('streak.composite.listener_factory');
+        $composite = $container->register(Event\Listener\CompositeFactory::class);
         $this->process($container);
 
         self::assertTrue($this->factoryRegistered($composite, 'foo'));

@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Streak\StreakBundle\Tests\DependencyInjection\Compiler;
 
 use PHPUnit\Framework\TestCase;
+use Streak\Infrastructure\Application\CommandBus\SynchronousCommandBus;
 use Streak\StreakBundle\DependencyInjection\Compiler\RegisterCommandHandlersCompilerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -50,19 +51,19 @@ class RegisterCommandHandlersCompilerPassTest extends TestCase
             ->setDecoratedService('moo')
         ;
 
-        $composite = $container->register('streak.composite.command_handler');
+        $bus = $container->register(SynchronousCommandBus::class);
         $this->process($container);
 
-        self::assertTrue($this->handlerRegistered($composite, 'foo'));
-        self::assertTrue($this->handlerRegistered($composite, 'bar'));
-        self::assertTrue($this->handlerRegistered($composite, 'moo'));
-        self::assertFalse($this->handlerRegistered($composite, 'nope'));
+        self::assertTrue($this->handlerRegistered($bus, 'foo'));
+        self::assertTrue($this->handlerRegistered($bus, 'bar'));
+        self::assertTrue($this->handlerRegistered($bus, 'moo'));
+        self::assertFalse($this->handlerRegistered($bus, 'nope'));
     }
 
     private function handlerRegistered(Definition $composite, $id): bool
     {
         $calls = $composite->getMethodCalls();
-        $call = ['registerHandler', [new Reference($id)]];
+        $call = ['register', [new Reference($id)]];
 
         return false !== array_search($call, $calls);
     }

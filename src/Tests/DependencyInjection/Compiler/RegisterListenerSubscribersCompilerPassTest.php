@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Streak\StreakBundle\Tests\DependencyInjection\Compiler;
 
 use PHPUnit\Framework\TestCase;
+use Streak\Infrastructure\Domain\EventBus\InMemoryEventBus;
 use Streak\StreakBundle\DependencyInjection\Compiler\RegisterListenerSubscribersCompilerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -45,7 +46,7 @@ class RegisterListenerSubscribersCompilerPassTest extends TestCase
             ->register('nope')
         ;
 
-        $bus = $container->register('streak.in_memory.event_bus');
+        $bus = $container->register(InMemoryEventBus::class);
         $this->process($container);
 
         self::assertTrue($this->subscriberRegistered($bus, 'foo'));

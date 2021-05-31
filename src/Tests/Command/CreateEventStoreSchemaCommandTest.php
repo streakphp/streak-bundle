@@ -15,7 +15,7 @@ namespace Streak\StreakBundle\Tests\Command;
 
 use PHPUnit\Framework\TestCase;
 use Streak\Domain\EventStore;
-use Streak\Infrastructure\EventStore\Schema;
+use Streak\Infrastructure\Domain\EventStore\Schema;
 use Streak\StreakBundle\Command\CreateEventStoreSchemaCommand;
 use Streak\StreakBundle\Tests\Command\CreateEventStoreSchemaCommandTest\EventStoreWithSchema;
 use Symfony\Component\Console\Input\StringInput;
@@ -182,7 +182,7 @@ class CreateEventStoreSchemaCommandTest extends TestCase
 namespace Streak\StreakBundle\Tests\Command\CreateEventStoreSchemaCommandTest;
 
 use Streak\Domain\EventStore;
-use Streak\Infrastructure\EventStore\Schemable;
+use Streak\Infrastructure\Domain\EventStore\Schemable;
 
 abstract class EventStoreWithSchema implements EventStore, Schemable
 {
