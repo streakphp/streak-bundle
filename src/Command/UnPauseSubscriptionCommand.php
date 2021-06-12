@@ -35,7 +35,7 @@ class UnPauseSubscriptionCommand extends SubscriptionCommand
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('streak:subscription:unpause');
         $this->setDescription('Unpause single subscription');

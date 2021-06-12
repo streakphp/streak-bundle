@@ -35,7 +35,7 @@ class ResetSnapshotsCommand extends Command
         parent::__construct(null);
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('streak:snapshots:storage:reset');
         $this->setDescription('Removes all snapshots and resets related schemas');

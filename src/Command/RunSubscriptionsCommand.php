@@ -52,7 +52,7 @@ class RunSubscriptionsCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('streak:subscriptions:run');
         $this->setDescription('Runs all subscriptions (sagas, process managers, projectors, etc) in sub processes');

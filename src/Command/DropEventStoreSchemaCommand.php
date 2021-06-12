@@ -35,7 +35,7 @@ class DropEventStoreSchemaCommand extends Command
         parent::__construct(null);
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('streak:event-store:schema:drop');
         $this->setDescription('Drops event store schema - for underlying persistence mechanism - if possible');

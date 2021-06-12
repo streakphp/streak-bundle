@@ -35,7 +35,7 @@ class LazyLoadedUnitOfWorkTest extends TestCase
         $this->uow = $this->getMockBuilder(UnitOfWork::class)->getMockForAbstractClass();
     }
 
-    public function testObject()
+    public function testObject(): void
     {
         $this->container
             ->expects(self::atLeastOnce())

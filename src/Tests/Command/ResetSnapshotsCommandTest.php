@@ -40,7 +40,7 @@ class ResetSnapshotsCommandTest extends TestCase
         $this->output = $this->getMockBuilder(OutputInterface::class)->getMockForAbstractClass();
     }
 
-    public function testSuccessfulReset()
+    public function testSuccessfulReset(): void
     {
         $command = new ResetSnapshotsCommand($this->resettableStorage);
 
@@ -70,7 +70,7 @@ class ResetSnapshotsCommandTest extends TestCase
         $command->run(new StringInput(''), $this->output);
     }
 
-    public function testFailedReset()
+    public function testFailedReset(): void
     {
         $command = new ResetSnapshotsCommand($this->resettableStorage);
 
@@ -100,7 +100,7 @@ class ResetSnapshotsCommandTest extends TestCase
         $command->run(new StringInput(''), $this->output);
     }
 
-    public function testUnsupportedReset()
+    public function testUnsupportedReset(): void
     {
         $command = new ResetSnapshotsCommand($this->nonResettableStorage);
 

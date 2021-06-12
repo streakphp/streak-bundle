@@ -25,7 +25,7 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class RegisterQueryHandlersCompilerPass implements CompilerPassInterface
 {
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $composite = $container->findDefinition(SynchronousQueryBus::class);
         $factories = $container->findTaggedServiceIds('streak.query_handler');

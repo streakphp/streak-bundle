@@ -44,7 +44,7 @@ class CreateEventStoreSchemaCommandTest extends TestCase
         $this->output = $this->getMockBuilder(OutputInterface::class)->getMockForAbstractClass();
     }
 
-    public function testNotSchemable()
+    public function testNotSchemable(): void
     {
         $command = new CreateEventStoreSchemaCommand($this->schemalessStore);
 
@@ -69,7 +69,7 @@ class CreateEventStoreSchemaCommandTest extends TestCase
         self::assertSame(0, $exit);
     }
 
-    public function testNoSchema()
+    public function testNoSchema(): void
     {
         $command = new CreateEventStoreSchemaCommand($this->schemableStore);
 
@@ -96,7 +96,7 @@ class CreateEventStoreSchemaCommandTest extends TestCase
         self::assertSame(0, $exit);
     }
 
-    public function testSuccess()
+    public function testSuccess(): void
     {
         $command = new CreateEventStoreSchemaCommand($this->schemableStore);
 
@@ -133,7 +133,7 @@ class CreateEventStoreSchemaCommandTest extends TestCase
         self::assertSame(0, $exit);
     }
 
-    public function testError()
+    public function testError(): void
     {
         $command = new CreateEventStoreSchemaCommand($this->schemableStore);
 

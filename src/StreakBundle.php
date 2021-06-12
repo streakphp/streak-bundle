@@ -34,7 +34,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
  */
 class StreakBundle extends Bundle
 {
-    public function build(ContainerBuilder $container)
+    public function build(ContainerBuilder $container): void
     {
         $container->registerForAutoconfiguration(AggregateRoot\Factory::class)->addTag('streak.aggregate_factory');
         $container->registerForAutoconfiguration(CommandHandler::class)->addTag('streak.command_handler');
