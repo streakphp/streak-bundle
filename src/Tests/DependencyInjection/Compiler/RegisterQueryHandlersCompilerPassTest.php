@@ -27,7 +27,7 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class RegisterQueryHandlersCompilerPassTest extends TestCase
 {
-    public function testProcess()
+    public function testProcess(): void
     {
         $container = new ContainerBuilder();
         $container
@@ -68,7 +68,7 @@ class RegisterQueryHandlersCompilerPassTest extends TestCase
         return false !== array_search($call, $calls);
     }
 
-    private function process(ContainerBuilder $container)
+    private function process(ContainerBuilder $container): void
     {
         (new RegisterQueryHandlersCompilerPass())->process($container);
     }

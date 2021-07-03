@@ -37,7 +37,7 @@ class StreakExtensionTest extends TestCase
     /**
      * @depends testExtension
      */
-    public function testLoad(StreakExtension $extension)
+    public function testLoad(StreakExtension $extension): void
     {
         $container = new ContainerBuilder();
 

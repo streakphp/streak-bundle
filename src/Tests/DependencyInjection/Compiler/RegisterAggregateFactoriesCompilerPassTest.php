@@ -27,7 +27,7 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class RegisterAggregateFactoriesCompilerPassTest extends TestCase
 {
-    public function testProcess()
+    public function testProcess(): void
     {
         $container = new ContainerBuilder();
         $container
@@ -63,7 +63,7 @@ class RegisterAggregateFactoriesCompilerPassTest extends TestCase
         return false !== array_search($call, $calls);
     }
 
-    private function process(ContainerBuilder $container)
+    private function process(ContainerBuilder $container): void
     {
         (new RegisterAggregateFactoriesCompilerPass())->process($container);
     }

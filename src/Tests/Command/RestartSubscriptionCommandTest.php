@@ -50,7 +50,7 @@ class RestartSubscriptionCommandTest extends TestCase
         $this->output = new RestartSubscriptionCommandTest\TestOutput();
     }
 
-    public function testCommand()
+    public function testCommand(): void
     {
         $this->repository
             ->expects(self::once())
@@ -71,7 +71,7 @@ class RestartSubscriptionCommandTest extends TestCase
         self::assertEquals($expected, $this->output->output);
     }
 
-    public function testCommandWithInvalidType1()
+    public function testCommandWithInvalidType1(): void
     {
         $this->expectExceptionObject(new \InvalidArgumentException('Given "subscription-type" argument "foo-bar" is not a type of "Streak\Domain\Event\Listener\Id"'));
 
@@ -79,7 +79,7 @@ class RestartSubscriptionCommandTest extends TestCase
         $command->run(new ArrayInput(['subscription-type' => 'foo-bar', 'subscription-id' => 'EC2BE294-C07A-4198-A159-4551686F14F9']), $this->output);
     }
 
-    public function testCommandWithInvalidType2()
+    public function testCommandWithInvalidType2(): void
     {
         $this->expectExceptionObject(new \InvalidArgumentException('Given "subscription-type" argument "Streak\Domain\Id\UUID" is not a type of "Streak\Domain\Event\Listener\Id"'));
 
@@ -87,7 +87,7 @@ class RestartSubscriptionCommandTest extends TestCase
         $command->run(new ArrayInput(['subscription-type' => UUID::class, 'subscription-id' => 'EC2BE294-C07A-4198-A159-4551686F14F9']), $this->output);
     }
 
-    public function testCommandWithInvalidId()
+    public function testCommandWithInvalidId(): void
     {
         $this->expectExceptionObject(new \InvalidArgumentException('Given "subscription-id" argument "not-an-uuid" is invalid'));
 
@@ -95,7 +95,7 @@ class RestartSubscriptionCommandTest extends TestCase
         $command->run(new ArrayInput(['subscription-type' => 'Streak\\StreakBundle\\Tests\\Command\\RestartSubscriptionCommandTest\\SubscriptionId1', 'subscription-id' => 'not-an-uuid']), $this->output);
     }
 
-    public function testNotFound()
+    public function testNotFound(): void
     {
         $this->repository
             ->expects(self::once())
@@ -113,7 +113,7 @@ class RestartSubscriptionCommandTest extends TestCase
         self::assertEquals($expected, $this->output->output);
     }
 
-    public function testRestartNotPossible()
+    public function testRestartNotPossible(): void
     {
         $exception = new Exception\SubscriptionRestartNotPossible($this->subscription1);
 
@@ -137,7 +137,7 @@ class RestartSubscriptionCommandTest extends TestCase
         self::assertEquals($expected, $this->output->output);
     }
 
-    public function testError()
+    public function testError(): void
     {
         $exception = new \RuntimeException('Unexpected exception.');
 

@@ -40,7 +40,7 @@ class RunSubscriptionCommand extends SubscriptionCommand
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('streak:subscription:run');
         $this->setDescription('Runs single subscription (sagas, process managers, projectors, etc)');

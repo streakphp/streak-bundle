@@ -36,7 +36,7 @@ class RestartSubscriptionCommand extends SubscriptionCommand
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('streak:subscription:restart');
         $this->setDescription('Restart single subscription');

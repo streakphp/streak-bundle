@@ -25,7 +25,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  */
 class CreateListenerSubscribersCompilerPassTest extends TestCase
 {
-    public function testProcess()
+    public function testProcess(): void
     {
         $container = new ContainerBuilder();
         $container
@@ -73,7 +73,7 @@ class CreateListenerSubscribersCompilerPassTest extends TestCase
         return true;
     }
 
-    private function process(ContainerBuilder $container)
+    private function process(ContainerBuilder $container): void
     {
         (new CreateListenerSubscribersCompilerPass())->process($container);
     }

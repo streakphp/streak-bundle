@@ -25,7 +25,7 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class RegisterCommandHandlersCompilerPass implements CompilerPassInterface
 {
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $bus = $container->findDefinition(SynchronousCommandBus::class);
         $factories = $container->findTaggedServiceIds('streak.command_handler');

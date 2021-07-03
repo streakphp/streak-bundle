@@ -25,7 +25,7 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class RegisterListenerFactoriesCompilerPass implements CompilerPassInterface
 {
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $composite = $container->findDefinition(Event\Listener\CompositeFactory::class);
         $factories = $container->findTaggedServiceIds('streak.listener_factory');

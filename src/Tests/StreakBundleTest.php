@@ -24,7 +24,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  */
 class StreakBundleTest extends TestCase
 {
-    public function testBundle()
+    public function testBundle(): void
     {
         $bundle = new StreakBundle();
         $container = new ContainerBuilder();
