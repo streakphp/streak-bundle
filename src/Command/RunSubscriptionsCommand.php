@@ -103,6 +103,13 @@ class RunSubscriptionsCommand extends Command
             while ($this->runningProcesses() >= $limit) {
                 $this->output();
             }
+
+            // run infinitely?
+            if (false === $subscriptions->valid()) {
+                $subscriptions = $this->subscriptions->all($filter);
+                $subscriptions = new \IteratorIterator($subscriptions);
+                $subscriptions->rewind();
+            }
         }
 
         while ($this->runningProcesses()) {
