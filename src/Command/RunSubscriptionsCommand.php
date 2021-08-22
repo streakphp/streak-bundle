@@ -128,8 +128,8 @@ class RunSubscriptionsCommand extends Command
 
     private function command(Subscription $subscription): array
     {
-        $type = \get_class($subscription->subscriptionId());
-        $id = $subscription->subscriptionId()->toString();
+        $type = \get_class($subscription->id());
+        $id = $subscription->id()->toString();
 
         $command = ['bin/console', 'streak:subscription:run', $type, $id, '--no-ansi'];
 
